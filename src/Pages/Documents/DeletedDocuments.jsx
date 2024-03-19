@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { dbDoc } from "../../Components/db/dbDocuments.mjs";
-import { NavLink } from "react-router-dom";
+import { NavLink, json } from "react-router-dom";
 import { Document, Page } from "react-pdf";
 import ForwardToInboxIcon from "@mui/icons-material/ForwardToInbox";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -16,31 +16,13 @@ import { useDispatch, useSelector } from "react-redux";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { deleteMessages } from "../../Components/db/Redux/actions/sendMessages";
 
-export default function OutDocuments() {
+export default function DeletedDocuments() {
   const [open, setOpen] = useState(null);
 
   const handleOpen = (id) => {
     setOpen(id === open ? null : id);
   };
-  const stateDocs = useSelector((state) => state.sendedDocs);
-  const dispatch = useDispatch();
-
-  const handleDelete = (document) => {
-    dispatch(deleteMessages(document));
-
-    let deletedDocs = localStorage.getItem("deletedDocs") || "[]";
-    try {
-      deletedDocs = JSON.parse(deletedDocs);
-    } catch (error) {
-      console.error("Error parsing existing favorites:", error);
-      deletedDocs = [];
-    }
-    if (!deletedDocs.some((existingItem) => existingItem.id === document.id)) {
-      deletedDocs.push(document);
-    }
-    const updatedFavorites = JSON.stringify(deletedDocs);
-    localStorage.setItem("deletedDocs", updatedFavorites);
-  };
+  const stateDocs = JSON.parse(localStorage.getItem("deletedDocs")) || [];
 
   console.log(stateDocs);
   return (
@@ -52,7 +34,7 @@ export default function OutDocuments() {
           justifyContent="space-between"
         >
           <Typography fontSize="30px" mb="10px" fontWeight="600">
-            Out
+            Deleted Documents
           </Typography>
           <IconButton>
             <FilterAltIcon sx={{ width: "40px", height: "40px" }} />
@@ -60,33 +42,10 @@ export default function OutDocuments() {
         </Stack>
         <Divider />
 
-        <Stack
-          direction="row"
-          m="15px 0 15px 0"
-          alignItems="center"
-          spacing={3}
-        >
-          <Typography width="80px"></Typography>
-          <Typography color="gray" minWidth="90px">
-            Name
-          </Typography>
-          <Typography color="gray" minWidth="150px">
-            From
-          </Typography>
-          <Typography color="gray" minWidth="240px">
-            Status
-          </Typography>
-          <Typography color="gray" minWidth="100px">
-            Date
-          </Typography>
-          <Typography color="gray">Limit</Typography>
-        </Stack>
-        <Divider />
-
-        <Stack spacing={2}>
+        <Stack mt="20px" spacing={2}>
           {stateDocs.length === 0 ? (
             <Typography textAlign="center" fontSize="25px" pt="50px">
-              No documents have been sent yet
+              No Deleted Documents
             </Typography>
           ) : (
             stateDocs.map((item) => (
@@ -159,12 +118,6 @@ export default function OutDocuments() {
                   </NavLink>
 
                   <Button onClick={() => handleOpen(item.id)}>Open</Button>
-                  <IconButton
-                    onClick={() => handleDelete(item)}
-                    sx={{ color: "red" }}
-                  >
-                    <DeleteIcon sx={{ width: "25px", height: "25px" }} />
-                  </IconButton>
                 </Stack>
                 {open === item.id && (
                   <Stack
@@ -180,7 +133,7 @@ export default function OutDocuments() {
                     ></iframe>
                   </Stack>
                 )}
-                <Divider />
+                <Divider sx={{ mt: "10px" }} />
               </Stack>
             ))
           )}

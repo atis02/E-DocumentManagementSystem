@@ -2,10 +2,8 @@
   margin: 0;
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
+  /* min-height: auto; */
 }
-
-
-
 .sideNav {
   font-size: 15px;
   background-color: #101418;
@@ -19,4 +17,7 @@
 
 .active {
   background-color: #18344F
+}
+.noBorder{
+  border: none !important;
 }
