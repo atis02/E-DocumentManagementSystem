@@ -2,22 +2,22 @@
   margin: 0;
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
-  /* min-height: auto; */
 }
 .sideNav {
   font-size: 15px;
-  background-color: #101418;
+  background-color: #0B57D0;
 }
 
 .sideNav2 {
   font-size: 15px;
-  background-color: #0e0d0d
+  background-color: #0a49ae
 }
-
-
 .active {
   background-color: #18344F
 }
 .noBorder{
   border: none !important;
+}
+.ps-menu-button:hover{
+background: #c6c6c6;
 }

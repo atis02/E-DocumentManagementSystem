@@ -3,38 +3,53 @@ import {
   Box,
   Button,
   Divider,
+  FormControl,
   IconButton,
-  Modal,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
+  TextField,
   Typography,
+  Modal,
 } from "@mui/material";
 import { dbDoc } from "../../Components/db/dbDocuments.mjs";
 import { NavLink } from "react-router-dom";
 import ForwardToInboxIcon from "@mui/icons-material/ForwardToInbox";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import { useDispatch, useSelector } from "react-redux";
-import { sendMessages } from "../../Components/db/Redux/actions/sendMessages";
 import DocumentDetail from "../DocumentDetail";
 
 export default function InboxDocuments() {
   const [open, setOpen] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [age, setAge] = useState("");
+  const [status, setStatus] = useState("");
+  const [document, setDocument] = useState(dbDoc);
+  const [titleSearch, setTitleSearch] = useState("");
+  const [fromSearch, setFromSearch] = useState("");
 
-  const dispatch = useDispatch();
-
+  const handleChangeAge = (event) => {
+    setAge(event.target.value);
+  };
+  const handleChangeStatus = (event) => {
+    setStatus(event.target.value);
+  };
+  const filterByStatus = (status) => {
+    const updatedDoc = dbDoc.filter((x) => x.status === status);
+    setDocument(updatedDoc);
+    console.log(updatedDoc);
+  };
+  const filterByCat = (category) => {
+    const updatedDoc = dbDoc.filter((x) => x.typeDoc === category);
+    setDocument(updatedDoc);
+  };
   const handleOpen = (id) => {
     setOpen(id === open ? null : id);
   };
-  const stateDocs = useSelector((state) => state.sendedDocs);
-  console.log(stateDocs);
 
   const handleModalOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
 
-  const handleSend = (document) => {
-    // setModalOpen(true);
-    dispatch(sendMessages(document));
-  };
   const style = {
     position: "absolute",
     top: "50%",
@@ -57,33 +72,141 @@ export default function InboxDocuments() {
           justifyContent="space-between"
         >
           <Typography fontSize="30px" mb="10px" fontWeight="600">
-            Inbox
+            Gelen Resminalamalar
           </Typography>
-          <IconButton>
-            <FilterAltIcon sx={{ width: "40px", height: "40px" }} />
-          </IconButton>
         </Stack>
         <Divider />
 
         <Stack
           direction="row"
-          m="15px 0 15px 0"
           alignItems="center"
-          spacing={3}
+          justifyContent="space-between"
+          // spacing={3}
+          p="0 85px 0 30px"
         >
-          <Typography width="80px"></Typography>
-          <Typography color="gray" minWidth="90px">
-            Name
+          <Typography width="70px" textAlign="center">
+            Süzgüç
           </Typography>
-          <Typography color="gray" minWidth="150px">
-            From
+          <TextField
+            id="outlined-basic"
+            // label="From"
+            variant="outlined"
+            sx={{ height: "35px" }}
+            onChange={(e) => setTitleSearch(e.target.value)}
+            value={titleSearch}
+            placeholder="Ady boýunça gözle"
+            InputProps={{
+              sx: {
+                border: "1px solid #424242",
+                borderRadius: "35px",
+                height: "35px",
+                color: "#000",
+                fontWeight: "600",
+
+                padding: "none",
+              },
+            }}
+          />
+          <FormControl
+            variant="standard"
+            sx={{ pb: "15px", m: 1, minWidth: 120 }}
+          >
+            <InputLabel id="demo-simple-select-standard-label">
+              Kategoriýasy
+            </InputLabel>
+            <Select
+              // labelId="demo-simple-select-standard-label"
+              // id="demo-simple-select-standard"
+              value={age}
+              // disableUnderline
+              onChange={handleChangeAge}
+              label="Category"
+            >
+              <MenuItem onClick={() => filterByCat("Arza")} value="Arza">
+                Arza
+              </MenuItem>
+              <MenuItem
+                onClick={() => filterByCat("Şertnama")}
+                value="Şertnama"
+              >
+                Şertnama
+              </MenuItem>
+              <MenuItem onClick={() => filterByCat("Arenda")} value="Arenda">
+                Arenda
+              </MenuItem>
+              <MenuItem onClick={() => filterByCat("Faktura")} value="Faktura">
+                Faktura
+              </MenuItem>
+              <MenuItem
+                onClick={() => filterByCat("Bildiris")}
+                value="Bildiris"
+              >
+                Bildiris
+              </MenuItem>
+              <MenuItem
+                onClick={() => filterByCat("Ise almak")}
+                value="Ise almak"
+              >
+                Ise almak
+              </MenuItem>
+            </Select>
+          </FormControl>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              id="outlined-basic"
+              // label="From"
+              variant="outlined"
+              sx={{ height: "35px" }}
+              onChange={(e) => setFromSearch(e.target.value)}
+              placeholder="Ugradyjy"
+              InputProps={{
+                sx: {
+                  border: "1px solid #424242",
+                  borderRadius: "35px",
+                  height: "35px",
+                  color: "#000",
+                  fontWeight: "600",
+
+                  padding: "none",
+                },
+              }}
+            />
+          </Stack>
+          <FormControl variant="standard" sx={{ pb: "15px", minWidth: 180 }}>
+            <InputLabel id="demo-simple-select-standard-label">
+              Statusy
+            </InputLabel>
+            <Select value={status} onChange={handleChangeStatus} label="Status">
+              <MenuItem value="Hemmesi" onClick={() => setDocument(dbDoc)}>
+                Hemmesi
+              </MenuItem>
+              <MenuItem
+                value="Barlagda"
+                onClick={() => filterByStatus("Barlagda")}
+              >
+                Barlagda
+              </MenuItem>
+              <MenuItem
+                value="Yzyna gaýtarylan"
+                onClick={() => filterByStatus("Yzyna gaýtarylan")}
+              >
+                Yzyna gaýtarylan
+              </MenuItem>
+              <MenuItem
+                value="Tassyklanan"
+                onClick={() => filterByStatus("Tassyklanan")}
+              >
+                Tassyklanan
+              </MenuItem>
+            </Select>
+          </FormControl>
+
+          <Typography color="gray" width="52px" fontSize={18}>
+            Senesi
           </Typography>
-          <Typography color="gray" minWidth="240px">
-            Status
-          </Typography>
-          <Typography color="gray">Date</Typography>
         </Stack>
         <Divider />
+
         <Stack spacing={2}>
           {dbDoc.map((item) => (
             <Stack

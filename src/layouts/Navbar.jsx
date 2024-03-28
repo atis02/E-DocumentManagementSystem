@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -11,16 +11,33 @@ import {
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import {
+  DateCalendar,
+  LocalizationProvider,
+  StaticTimePicker,
+  TimeClock,
+} from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
+  const admin = JSON.parse(localStorage.getItem("token") || "[]");
+  const [openCalendar, setOpenCalendar] = useState(false);
+
+  const isLoggedIn = useSelector((state) => state.auth.user);
+
+  console.log(isLoggedIn);
   const checTime = (i) => {
     if (i < 10) {
       i = "0" + i;
     }
     return i;
   };
+
   const Time = () => {
     const today = new Date();
     let h = today.getHours();
@@ -29,20 +46,22 @@ export default function Navbar() {
     h = checTime(h);
     m = checTime(m);
     s = checTime(s);
-    // console.log(s == 0 ? "log" : "");
+    document.getElementById("time").innerHTML = h + ":" + m;
     document.getElementById("time").innerHTML = h + ":" + m;
     setTimeout(Time, s == 0 ? 1000 : "");
   };
+
   useEffect(() => Time());
   let date = new Date().toLocaleDateString("en-us", { day: "numeric" });
   let month = new Date().toLocaleDateString("en-us", { month: "2-digit" });
   let year = new Date().toLocaleDateString("en-us", { year: "numeric" });
   const FormattedDate = `${date}/${month}/${year}`;
+
   return (
     <Box
       height="65px"
       width="100%"
-      backgroundColor="#101418"
+      backgroundColor="#0B57D0"
       boxShadow="0px 1px 8px #999"
       sx={{
         display: "flex",
@@ -62,11 +81,15 @@ export default function Navbar() {
           endAdornment: (
             <Button
               sx={{
-                minWidth: "18px",
-                minHeight: "18px",
-                "&:hover": { backgroundColor: "#424242" },
-                color: "#8E96A1",
+                minWidth: "25px",
+                minHeight: "25px",
+                "&:hover": {
+                  backgroundColor: "#0B57D0",
+                  color: "#fff",
+                },
+                color: "#000",
                 p: "0",
+                transition: "all ease 0.4s",
               }}
             >
               <svg
@@ -75,7 +98,7 @@ export default function Navbar() {
                 data-icon="search"
                 width="25px"
                 height="25px"
-                fill="#8E96A1"
+                fill="currentColor"
                 aria-hidden="true"
               >
                 <path d="M909.6 854.5L649.9 594.8C690.2 542.7 712 479 712 412c0-80.2-31.3-155.4-87.9-212.1-56.6-56.7-132-87.9-212.1-87.9s-155.5 31.3-212.1 87.9C143.2 256.5 112 331.8 112 412c0 80.1 31.3 155.5 87.9 212.1C256.5 680.8 331.8 712 412 712c67 0 130.6-21.8 182.7-62l259.7 259.6a8.2 8.2 0 0011.6 0l43.6-43.5a8.2 8.2 0 000-11.6zM570.4 570.4C528 612.7 471.8 636 412 636s-116-23.3-158.4-65.6C211.3 528 188 471.8 188 412s23.3-116.1 65.6-158.4C296 211.3 352.2 188 412 188s116.1 23.2 158.4 65.6S636 352.2 636 412s-23.3 116.1-65.6 158.4z"></path>
@@ -83,29 +106,73 @@ export default function Navbar() {
             </Button>
           ),
           sx: {
-            border: "1px solid #424242",
             transition: "all ease-in-out 0.2s",
-            "&:hover": { backgroundColor: "#424242" },
             borderRadius: "35px",
-            backgroundColor: "#1F262E",
+            backgroundColor: "#fff",
             height: "35px",
-            color: "#fff",
+            color: "#000",
             fontWeight: "600",
+            outline: "none",
+            boxShadow: "none",
           },
         }}
         variant="outlined"
       />
-      <Stack direction="row" alignItems="end" spacing={0.5}>
+      <Stack
+        direction="row"
+        sx={{ cursor: "pointer" }}
+        onClick={() => setOpenCalendar(!openCalendar)}
+        alignItems="end"
+        spacing={0.5}
+      >
         <Typography
-          color="#8E96A1"
+          color="#fff"
           fontSize={40}
           fontWeight="700"
           id="time"
         ></Typography>
-        <Typography color="#8E96A1" pb="10px">
+        <Typography color="#fff" pb="10px">
           {FormattedDate}
         </Typography>
       </Stack>
+      {openCalendar && (
+        <Stack
+          position="absolute"
+          top={70}
+          left={900}
+          backgroundColor="#fff"
+          zIndex={30}
+          borderRadius="10px"
+          border="1px solid #0B57D0"
+        >
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={["DateCalendar"]}>
+              <DemoItem>
+                <Stack direction="row">
+                  <Stack>
+                    <TimeClock
+                      minutesStep={1}
+                      defaultValue={dayjs()}
+                      ampm={false}
+                      readOnly
+                      views={["hours"]}
+                    />
+                    <TimeClock
+                      minutesStep={1}
+                      defaultValue={dayjs()}
+                      ampm={false}
+                      readOnly
+                      views={["minutes"]}
+                    />
+                  </Stack>
+
+                  <DateCalendar defaultValue={dayjs()} readOnly />
+                </Stack>
+              </DemoItem>
+            </DemoContainer>
+          </LocalizationProvider>
+        </Stack>
+      )}
       <Stack
         direction="row"
         spacing={2}
@@ -115,7 +182,7 @@ export default function Navbar() {
       >
         <Stack
           direction="row"
-          color="#8E96A1"
+          color="#fff"
           fontWeight="600"
           alignItems="center"
           fontSize="18px"
@@ -127,7 +194,7 @@ export default function Navbar() {
               "&:hover": { backgroundColor: "#424242" },
             }}
           >
-            <NotificationsNoneIcon sx={{ color: "#5C9FE3" }} />
+            <NotificationsNoneIcon sx={{ color: "lightgray" }} />
           </IconButton>
           Bildirişler
           {open2 ? (
@@ -135,8 +202,9 @@ export default function Navbar() {
               position="absolute"
               minWidth={200}
               minHeight={100}
-              backgroundColor="#101418"
-              top={60}
+              backgroundColor="#0B57D0"
+              top={70}
+              right={380}
               border="1px solid gray"
               borderRadius="10px"
               alignItems="center"
@@ -150,10 +218,11 @@ export default function Navbar() {
         </Stack>
         <Stack
           direction="row"
-          color="#8E96A1"
+          color="#fff"
           fontWeight="600"
           alignItems="center"
           fontSize="18px"
+          pr="50px"
         >
           <IconButton
             onClick={() => setOpen(!open)}
@@ -163,7 +232,7 @@ export default function Navbar() {
               "&:hover": { backgroundColor: "#424242" },
             }}
           >
-            <SettingsIcon />
+            <SettingsIcon sx={{ color: "lightgray" }} />
           </IconButton>
           Sazlamalar
           {open ? (
@@ -171,8 +240,8 @@ export default function Navbar() {
               position="absolute"
               minWidth={200}
               minHeight={100}
-              backgroundColor="#101418"
-              top={60}
+              backgroundColor="#0B57D0"
+              top={70}
               border="1px solid gray"
               borderRadius="10px"
               alignItems="center"
@@ -184,14 +253,19 @@ export default function Navbar() {
             ""
           )}
         </Stack>
-        <IconButton
-          sx={{
-            transition: "all ease-in-out 0.2s",
-            "&:hover": { backgroundColor: "#424242" },
-          }}
-        >
-          <Avatar src="/broken-image.jpg" />
-        </IconButton>
+        <Stack direction="row" alignItems="center">
+          <IconButton
+            sx={{
+              transition: "all ease-in-out 0.2s",
+              "&:hover": { backgroundColor: "#424242" },
+            }}
+          >
+            <Avatar src="/broken-image.jpg" sx={{ background: "blue" }} />
+          </IconButton>
+          <Typography color="#fff" fontWeight={600}>
+            {isLoggedIn.toUpperCase()}
+          </Typography>
+        </Stack>
       </Stack>
     </Box>
   );

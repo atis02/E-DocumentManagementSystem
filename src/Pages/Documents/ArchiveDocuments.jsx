@@ -14,9 +14,8 @@ import {
 } from "@mui/material";
 import { dbDoc } from "../../Components/db/dbDocuments.mjs";
 import { NavLink } from "react-router-dom";
-import DeleteIcon from "@mui/icons-material/Delete";
 
-export default function OutDocuments() {
+export default function ArchiveDocuments() {
   const [open, setOpen] = useState(null);
   const [age, setAge] = useState("");
   const [status, setStatus] = useState("");
@@ -52,7 +51,7 @@ export default function OutDocuments() {
           justifyContent="space-between"
         >
           <Typography fontSize="30px" mb="10px" fontWeight="600">
-            Ugradylan Resminalamalar
+            Arhiw
           </Typography>
         </Stack>
         <Divider />
@@ -187,8 +186,8 @@ export default function OutDocuments() {
         </Stack>
         <Divider />
 
-        <Stack spacing={2}>
-          {/* {stateDocs.length === 0 ? (
+        {/* <Stack spacing={2}>
+          {stateDocs.length === 0 ? (
             <Typography textAlign="center" fontSize="25px" pt="50px">
               Hiç zat ýok
             </Typography>
@@ -287,8 +286,8 @@ export default function OutDocuments() {
                 <Divider />
               </Stack>
             ))
-          )} */}
-        </Stack>
+          )}
+        </Stack> */}
       </Stack>
     </Box>
   );

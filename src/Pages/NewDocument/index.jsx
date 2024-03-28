@@ -50,7 +50,7 @@ export default function NewDocument() {
   const textFieldRef3 = useRef();
   const newTextFieldRef = useRef(null);
   const descTextFieldRef = useRef(null);
-
+  console.log(users);
   const handleOpen = (id) => {
     setOpen2(id === open2 ? null : id);
   };
@@ -59,18 +59,25 @@ export default function NewDocument() {
     setFiles(incommingFiles);
     files.length > 0 ? toast.success("Document succesfully uploaded!") : "";
   };
+  const admin = JSON.parse(localStorage.getItem("token") || "[]");
 
   const handleDelete = (id) => {
     const updatedFiles = files.filter((x) => x.id != id);
     setFiles(updatedFiles);
   };
-
   // steps func is start
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState("");
   const [valuesDesc, setValuesDesc] = useState();
-  const [stepUser, setStepUser] = useState([]);
-
+  const [stepUser, setStepUser] = useState([
+    {
+      id: admin.id,
+      values: [admin.fullName],
+      valuesDesc,
+      subStepper: [],
+    },
+  ]);
+  console.log(stepUser);
   const [activeStep, setActiveStep] = useState(0);
   const [time, setTime] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -181,7 +188,8 @@ export default function NewDocument() {
   };
 
   const handleDelete2 = (id) => {
-    const updatedStep = stepUser.filter((x) => x.id !== id);
+    const updatedStep =
+      id !== admin.id ? stepUser.filter((x) => x.id !== id) : stepUser;
     setStepUser(updatedStep);
   };
   //
@@ -220,7 +228,7 @@ export default function NewDocument() {
       // [event.target.name]: event.target.value,
       typeDoc: type,
     });
-    console.log(formData);
+    console.log(stepUser);
   };
   return (
     <Box width="100%">
@@ -385,10 +393,9 @@ export default function NewDocument() {
                     }}
                     key={step.id}
                   >
-                    {/* icon={step.values[0]} */}
                     <StepLabel>
                       <Typography fontSize="20px" fontWeight={600}>
-                        {step.values.join(" , ")}
+                        {step.values}
                       </Typography>
                     </StepLabel>
                     <Stack
@@ -433,10 +440,15 @@ export default function NewDocument() {
                       <Button
                         variant="outlined"
                         color="error"
-                        sx={{ display: "flex", gap: "5px" }}
+                        sx={{
+                          ...(admin.id === step.id
+                            ? { display: "none" }
+                            : { display: "flex" }),
+                          gap: "5px",
+                        }}
                         onClick={() => handleDelete2(step.id)}
                       >
-                        {step.values.join(" , ")}
+                        {step.values}
                         <DeleteIcon />
                       </Button>
                     </Stack>
@@ -639,12 +651,19 @@ export default function NewDocument() {
                     }}
                     onSubmit={handleAddStep}
                   >
+                    {console.log(stepUser.map((item) => item.values[0]))}
                     <Autocomplete
                       multiple={true}
                       disablePortal
                       filterSelectedOptions
                       id="combo-box-demo"
-                      options={users.map((elem) => elem.fullName)}
+                      options={users.map((elem, index) =>
+                        stepUser.find((item) =>
+                          item.values.includes(elem.fullName)
+                        )
+                          ? ""
+                          : elem.fullName
+                      )}
                       onChange={handleChangeStep}
                       renderInput={(params) => (
                         <TextField

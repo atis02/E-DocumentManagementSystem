@@ -2,45 +2,56 @@ import {
   Box,
   Button,
   CircularProgress,
-  FormControl,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { AxiosInstance } from "../Components/db/AxiosInstance";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../Components/db/Redux/reducers/ReduxSlice";
 
 const Login = () => {
   const [data, setData] = useState();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errMsg, setErrMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setErrMsg("");
+  }, [email, password]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email.trim().length <= 0 || password.trim().length <= 0) {
-      toast.error("Dogry maglumatyňyzy giriziň!");
-    } else {
-      setLoading(true);
-      const response = await AxiosInstance.post("/auth/signin", {
-        email,
-        password,
-      })
-        .then((res) => {
-          if (!res.data.error) {
-            setData(res.data);
-            toast.success("Succesfully Signed in");
-            setLoading(false);
-            navigate("/");
-          }
-        })
-        .catch((err) => toast.error(err.response.data.msg));
-      setLoading(false);
+    try {
+      if (email.trim().length <= 0 || password.trim().length <= 0) {
+        toast.error("Dogry maglumatyňyzy giriziň!");
+      } else {
+        setLoading(true);
+        const response = await AxiosInstance.post("/auth/signin", {
+          email,
+          password,
+        });
+        console.log(response);
+        const user = response.data.user.email;
+        const token = response.data.token;
+        dispatch(loginSuccess({ user, token }));
+        if (response.status === 200) {
+          navigate("/");
+        }
+        setLoading(false);
+      }
+    } catch (error) {
+      toast.error(error.response.data.msg);
+      if (error) {
+        setLoading(false);
+      }
     }
   };
   return (
@@ -69,12 +80,14 @@ const Login = () => {
             label="Email ýada Adyňyz"
             type="text"
             variant="outlined"
+            name="username"
             onChange={(e) => setEmail(e.target.value)}
           />
           <TextField
             id="outlined-basic"
             label="Açar söz"
             type="text"
+            name="password"
             onChange={(e) => setPassword(e.target.value)}
             variant="outlined"
           />
