@@ -4,6 +4,7 @@ const initialState = {
   isLoggedIn: false,
   user: null,
   token: null,
+  refreshToken:null,
 };
 
 const authSlice = createSlice
@@ -21,8 +22,11 @@ const authSlice = createSlice
       state.user = null;
       state.token = null;
     },
+    setRefreshToken(state, action) {
+      state.refreshToken = action.payload;
+    }
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout,setRefreshToken } = authSlice.actions;
 export default authSlice.reducer;

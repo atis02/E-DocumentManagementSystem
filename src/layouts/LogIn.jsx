@@ -43,12 +43,13 @@ const Login = () => {
         const token = response.data.token;
         dispatch(loginSuccess({ user, token }));
         if (response.status === 200) {
+          localStorage.setItem("token", JSON.stringify(response.data.token));
           navigate("/");
         }
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response.data.msg);
+      console.log(error.response.data.msg);
       if (error) {
         setLoading(false);
       }
