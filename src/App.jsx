@@ -17,10 +17,21 @@ import DocumentDetail from "./Pages/DocumentDetail";
 import ArchiveDocuments from "./Pages/Documents/ArchiveDocuments";
 import Login from "./layouts/LogIn";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { store } from "./Components/db/Redux/api/store";
+import useRefreshToken from "./Components/db/Redux/api/refreshToken";
 
 function App() {
+  const refToken = store.getState().refreshToken;
+  const refresh = useRefreshToken();
+
+  useEffect(() => {
+    useRefreshToken();
+  }, [refToken]);
+
   const ProtectedRoute = ({ children }) => {
-    const isLoggedIn = useSelector((state) => state.auth.user !== null);
+    // const isLoggedIn = useSelector((state) => state.auth.user == null);
+    const isLoggedIn = localStorage.getItem("token");
 
     if (!isLoggedIn) {
       return <Navigate to="/login" replace />; // Redirect to login on unauthorized access

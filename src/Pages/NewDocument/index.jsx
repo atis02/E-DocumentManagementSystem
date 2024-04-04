@@ -50,11 +50,9 @@ export default function NewDocument() {
   const textFieldRef3 = useRef();
   const newTextFieldRef = useRef(null);
   const descTextFieldRef = useRef(null);
-  console.log(users);
   const handleOpen = (id) => {
     setOpen2(id === open2 ? null : id);
   };
-  const handleChange = (event) => {};
   const updateFiles = (incommingFiles) => {
     setFiles(incommingFiles);
     files.length > 0 ? toast.success("Document succesfully uploaded!") : "";
@@ -71,13 +69,12 @@ export default function NewDocument() {
   const [valuesDesc, setValuesDesc] = useState();
   const [stepUser, setStepUser] = useState([
     {
-      id: admin.id,
-      values: [admin.fullName],
+      id: admin.user.id,
+      values: [admin.user.fullName],
       valuesDesc,
       subStepper: [],
     },
   ]);
-  console.log(stepUser);
   const [activeStep, setActiveStep] = useState(0);
   const [time, setTime] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -130,14 +127,6 @@ export default function NewDocument() {
 
   const handleClose = () => setModalOpen(false);
 
-  const handleAddStepOpen = (id) => {
-    setAddStep(id === addStep ? null : id);
-  };
-
-  const handleOpenStep = (index) => {
-    setOpen(index === open ? null : index);
-  };
-
   const handleNext = (index) => {
     setModalOpen(true);
     setTime(index === time ? null : index);
@@ -146,10 +135,6 @@ export default function NewDocument() {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
     toast.success("Document was send BACK!");
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
   };
 
   const handleChangeStep = (e, newValues) => {
@@ -192,44 +177,30 @@ export default function NewDocument() {
       id !== admin.id ? stepUser.filter((x) => x.id !== id) : stepUser;
     setStepUser(updatedStep);
   };
-  //
   const handleSubmit = (e) => {
-    // const { control } = useController;
-    setFormData({
-      ...formData,
-      id: Math.floor(Math.random() * 1000),
-      send_date: textFieldRef.current.value,
-      limit_date: textFieldRef2.current.value,
-      title: newTextFieldRef.current.value,
-      typeDoc: textFieldRef3.current.value,
-      statusType: "3",
-      sender: "Admin",
-      file_link: files,
-      file_type: files.map((x) => x.type),
-      description: descTextFieldRef.current.value,
-      steps: stepUser,
-      status: "Barlagda",
-    });
-    formData === undefined ||
     type === "" ||
     newTextFieldRef.current.value === "" ||
     textFieldRef.current.value > textFieldRef2.current.value
       ? toast.error("Invalid data")
-      : dbDoc.push(formData) &&
-        toast.success("Document succesfully registered!");
-    // console.log(dbDoc);
+      : dbDoc.push({
+          ...formData,
+          id: Math.floor(Math.random() * 1000),
+          send_date: textFieldRef.current.value,
+          limit_date: textFieldRef2.current.value,
+          title: newTextFieldRef.current.value,
+          typeDoc: textFieldRef3.current.value,
+          statusType: "3",
+          sender: "Admin",
+          file_link: files,
+          file_type: files.map((x) => x.type),
+          description: descTextFieldRef.current.value,
+          steps: stepUser,
+          status: "Barlagda",
+        }) &&
+        toast.success("Document succesfully registered!") &&
+        setFormData("");
   };
-  console.log(stepUser);
-  console.log(dbDoc);
-  const handleFormChange = (event) => {
-    setFormData({
-      ...formData,
-      id: Math.floor(Math.random() * 1000),
-      // [event.target.name]: event.target.value,
-      typeDoc: type,
-    });
-    console.log(stepUser);
-  };
+
   return (
     <Box width="100%">
       <Toaster />
@@ -275,9 +246,9 @@ export default function NewDocument() {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={type}
-                error={
-                  textFieldRef3.current && textFieldRef3.current.value === ""
-                }
+                // error={
+                //   textFieldRef3.current && textFieldRef3.current.value === ""
+                // }
                 label="Resminamanyň görnüşi"
                 onChange={(e) => setType(e.target.value)}
                 inputRef={textFieldRef3}
@@ -440,10 +411,8 @@ export default function NewDocument() {
                       <Button
                         variant="outlined"
                         color="error"
+                        disabled={admin.user.id === step.id}
                         sx={{
-                          ...(admin.id === step.id
-                            ? { display: "none" }
-                            : { display: "flex" }),
                           gap: "5px",
                         }}
                         onClick={() => handleDelete2(step.id)}
@@ -651,19 +620,12 @@ export default function NewDocument() {
                     }}
                     onSubmit={handleAddStep}
                   >
-                    {console.log(stepUser.map((item) => item.values[0]))}
                     <Autocomplete
                       multiple={true}
-                      disablePortal
-                      filterSelectedOptions
+                      disableClearable
                       id="combo-box-demo"
-                      options={users.map((elem, index) =>
-                        stepUser.find((item) =>
-                          item.values.includes(elem.fullName)
-                        )
-                          ? ""
-                          : elem.fullName
-                      )}
+                      options={users.map((elem) => elem.fullName)}
+                      filterSelectedOptions
                       onChange={handleChangeStep}
                       renderInput={(params) => (
                         <TextField
@@ -671,7 +633,6 @@ export default function NewDocument() {
                           fullWidth
                           name="user_name"
                           focused
-                          // error={values === ""}
                           id="outlined-basic"
                           autoComplete="off"
                           label="Wezipe , Bölüm , Işgär "

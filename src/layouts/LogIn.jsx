@@ -10,9 +10,14 @@ import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import { AxiosInstance } from "../Components/db/AxiosInstance";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../Components/db/Redux/reducers/ReduxSlice";
+import {
+  AxiosInstance,
+  BASE_URL,
+} from "../Components/db/Redux/api/AxiosInstance";
+import axios from "axios";
+// import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [data, setData] = useState();
@@ -34,25 +39,25 @@ const Login = () => {
         toast.error("Dogry maglumatyňyzy giriziň!");
       } else {
         setLoading(true);
-        const response = await AxiosInstance.post("/auth/signin", {
+        const response = await AxiosInstance.post(`${BASE_URL}/auth/signin`, {
           email,
           password,
         });
         console.log(response);
         const user = response.data.user.email;
         const token = response.data.token;
+
         dispatch(loginSuccess({ user, token }));
         if (response.status === 200) {
-          localStorage.setItem("token", JSON.stringify(response.data.token));
-          navigate("/");
+          localStorage.setItem("token", JSON.stringify(response.data));
+          toast.success("Successfully logged in!");
+          setTimeout(() => navigate("/"), 1000);
         }
         setLoading(false);
       }
     } catch (error) {
-      console.log(error.response.data.msg);
-      if (error) {
-        setLoading(false);
-      }
+      toast.error(error.message);
+      setLoading(false);
     }
   };
   return (

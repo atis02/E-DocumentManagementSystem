@@ -30,8 +30,8 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { dbDoc } from "../Components/db/dbDocuments.mjs";
 import axios from "axios";
-import { AxiosInstance } from "../Components/db/AxiosInstance";
 import { logout } from "../Components/db/Redux/reducers/ReduxSlice";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function SidebarNav() {
   const [open, setOpen] = useState(true);
@@ -42,13 +42,18 @@ export default function SidebarNav() {
   const stateDocs = useSelector((state) => state.sendedDocs);
   const DeletedDocs = JSON.parse(localStorage.getItem("deletedDocs")) || [];
   const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.user);
+
   const Logout = async () => {
     const response = await axios
       .post("https://alemhasap.alemtilsimat.com/api/auth/signout")
       .then(
         (res) => console.log(res),
-        navigate("/login"),
-        localStorage.clear()
+        localStorage.removeItem("token"),
+
+        dispatch(logout()),
+        setTimeout(() => navigate("/login"), 1000),
+        toast.success("Succesfully Logout!")
       );
   };
   const dispatch = useDispatch();
@@ -88,6 +93,7 @@ export default function SidebarNav() {
             m="30px 30px"
           >
             <Link style={{ textDecoration: "none" }} to="/">
+              <ToastContainer />
               <Typography
                 color="#F3F3F4"
                 fontWeight="700"
@@ -216,7 +222,7 @@ export default function SidebarNav() {
           </Menu>
         </Stack>
         <Button
-          onClick={handleLogout}
+          onClick={Logout}
           sx={{ color: "#fff", display: "flex", flexDirection: "column" }}
         >
           <PowerSettingsNewIcon sx={{ width: 30, height: 30 }} />

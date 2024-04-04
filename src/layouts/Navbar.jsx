@@ -21,6 +21,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
+import { store } from "../Components/db/Redux/api/store";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -28,9 +29,9 @@ export default function Navbar() {
   const admin = JSON.parse(localStorage.getItem("token") || "[]");
   const [openCalendar, setOpenCalendar] = useState(false);
 
-  const isLoggedIn = useSelector((state) => state.auth.user);
-
-  console.log(isLoggedIn);
+  const token = store.getState();
+  console.log(token);
+  console.log(admin);
   const checTime = (i) => {
     if (i < 10) {
       i = "0" + i;
@@ -51,7 +52,12 @@ export default function Navbar() {
     setTimeout(Time, s == 0 ? 1000 : "");
   };
 
-  useEffect(() => Time());
+  useEffect(() => {
+    // const response = AxiosInstance.get("/auth/refresh").then((res) => {
+    //   console.log(res.data);
+    // });
+    Time();
+  });
   let date = new Date().toLocaleDateString("en-us", { day: "numeric" });
   let month = new Date().toLocaleDateString("en-us", { month: "2-digit" });
   let year = new Date().toLocaleDateString("en-us", { year: "numeric" });
@@ -263,7 +269,7 @@ export default function Navbar() {
             <Avatar src="/broken-image.jpg" sx={{ background: "blue" }} />
           </IconButton>
           <Typography color="#fff" fontWeight={600}>
-            {isLoggedIn.toUpperCase()}
+            {admin.user.email.toUpperCase()}
           </Typography>
         </Stack>
       </Stack>
