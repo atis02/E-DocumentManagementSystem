@@ -24,6 +24,7 @@
     "dayjs": "^1.11.10",
     "jwt-decode": "^4.0.0",
     "react": "^18.2.0",
+    "react-avatar-editor": "^13.0.2",
     "react-doc-viewer": "^0.1.5",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",

@@ -44,7 +44,7 @@ export default function OutDocuments() {
   };
 
   return (
-    <Box height="100%" width="100%">
+    <Box height="100vh" overflow="scroll" width="100%">
       <Stack p="20px 30px">
         <Stack
           direction="row"
@@ -52,7 +52,7 @@ export default function OutDocuments() {
           justifyContent="space-between"
         >
           <Typography fontSize="30px" mb="10px" fontWeight="600">
-            Ugradylan Resminalamalar
+            Ugradylan Resminamalar
           </Typography>
         </Stack>
         <Divider />

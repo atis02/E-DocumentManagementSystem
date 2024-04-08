@@ -10,7 +10,7 @@ export default function LandingPageLayout() {
 
   return (
     <Box>
-      <Stack direction="row" height="100%">
+      <Stack direction="row" maxHeight="100vh">
         <Sidebar />
         <Stack direction="column" width="100%">
           <Navbar />

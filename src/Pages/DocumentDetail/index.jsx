@@ -32,9 +32,10 @@ const DocumentDetail = ({ ...props }) => {
   const handleOpen = (id) => {
     setOpen2(id === open2 ? null : id);
   };
+  const admin = JSON.parse(localStorage.getItem("token") || "[]");
 
   return (
-    <Box height="100%" width="100%">
+    <Box height="100vh" overflow="scroll" width="100%">
       <Stack p="20px">
         <Typography fontSize="30px" fontWeight="600">
           Document
@@ -95,12 +96,12 @@ const DocumentDetail = ({ ...props }) => {
                   {item.send_date}
                 </Typography>
                 <Typography minWidth="100px" textAlign="start">
-                  <span style={{ color: "gray" }}>Sender </span> : O.Orazow (
-                  {item.sender})
+                  <span style={{ color: "gray" }}>Sender </span> :{" "}
+                  {admin.user.fullName}
                 </Typography>
                 <Typography minWidth="100px" textAlign="start">
-                  <span style={{ color: "gray" }}>Limit days</span> :(
-                  {item.limit_date})
+                  <span style={{ color: "gray" }}>Limit days</span> :{" "}
+                  {item.limit_date}
                 </Typography>
                 <Typography minWidth="100px" textAlign="start">
                   <span style={{ color: "gray" }}>Description</span> :{" "}

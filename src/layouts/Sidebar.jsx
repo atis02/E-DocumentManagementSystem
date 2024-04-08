@@ -32,6 +32,7 @@ import { dbDoc } from "../Components/db/dbDocuments.mjs";
 import axios from "axios";
 import { logout } from "../Components/db/Redux/reducers/ReduxSlice";
 import { ToastContainer, toast } from "react-toastify";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 export default function SidebarNav() {
   const [open, setOpen] = useState(true);
@@ -221,13 +222,32 @@ export default function SidebarNav() {
             </MenuItem>
           </Menu>
         </Stack>
-        <Button
-          onClick={Logout}
-          sx={{ color: "#fff", display: "flex", flexDirection: "column" }}
-        >
-          <PowerSettingsNewIcon sx={{ width: 30, height: 30 }} />
-          Çykmak
-        </Button>
+        <Stack>
+          <Button
+            sx={{
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+              fontSize: "15px",
+            }}
+          >
+            <HelpOutlineIcon sx={{ width: 30, height: 30 }} />
+            Kömek
+          </Button>
+          <Button
+            onClick={Logout}
+            sx={{
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              fontSize: "15px",
+            }}
+          >
+            <PowerSettingsNewIcon sx={{ width: 30, height: 30 }} />
+            Çykmak
+          </Button>
+        </Stack>
       </Sidebar>
     </>
   );

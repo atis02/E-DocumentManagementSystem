@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   Typography,
+  Backdrop,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
@@ -22,6 +23,7 @@ import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import { store } from "../Components/db/Redux/api/store";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function Navbar() {
     // });
     Time();
   });
-  let date = new Date().toLocaleDateString("en-us", { day: "numeric" });
+  let date = new Date().toLocaleDateString("en-us", { day: "2-digit" });
   let month = new Date().toLocaleDateString("en-us", { month: "2-digit" });
   let year = new Date().toLocaleDateString("en-us", { year: "numeric" });
   const FormattedDate = `${date}/${month}/${year}`;
@@ -127,13 +129,14 @@ export default function Navbar() {
       <Stack
         direction="row"
         sx={{ cursor: "pointer" }}
-        onClick={() => setOpenCalendar(!openCalendar)}
+        onClick={() => setOpenCalendar(true)}
         alignItems="end"
         spacing={0.5}
       >
         <Typography
           color="#fff"
           fontSize={40}
+          pl={24}
           fontWeight="700"
           id="time"
         ></Typography>
@@ -141,7 +144,15 @@ export default function Navbar() {
           {FormattedDate}
         </Typography>
       </Stack>
-      {openCalendar && (
+      <Backdrop
+        sx={{
+          backgroundColor: "transparent",
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={openCalendar}
+        onClick={() => setOpenCalendar(false)}
+      >
         <Stack
           position="absolute"
           top={70}
@@ -178,7 +189,7 @@ export default function Navbar() {
             </DemoContainer>
           </LocalizationProvider>
         </Stack>
-      )}
+      </Backdrop>
       <Stack
         direction="row"
         spacing={2}
@@ -194,7 +205,7 @@ export default function Navbar() {
           fontSize="18px"
         >
           <IconButton
-            onClick={() => setOpen2(!open2)}
+            onClick={() => setOpen2(true)}
             sx={{
               transition: "all ease-in-out 0.2s",
               "&:hover": { backgroundColor: "#424242" },
@@ -203,13 +214,21 @@ export default function Navbar() {
             <NotificationsNoneIcon sx={{ color: "lightgray" }} />
           </IconButton>
           Bildirişler
-          {open2 ? (
+          <Backdrop
+            sx={{
+              backgroundColor: "transparent",
+              color: "#fff",
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+            open={open2}
+            onClick={() => setOpen2(false)}
+          >
             <Stack
               position="absolute"
               minWidth={200}
               minHeight={100}
               backgroundColor="#0B57D0"
-              top={70}
+              top={65}
               right={380}
               border="1px solid gray"
               borderRadius="10px"
@@ -218,9 +237,7 @@ export default function Navbar() {
             >
               Bildiriş ýok
             </Stack>
-          ) : (
-            ""
-          )}
+          </Backdrop>
         </Stack>
         <Stack
           direction="row"
@@ -241,13 +258,22 @@ export default function Navbar() {
             <SettingsIcon sx={{ color: "lightgray" }} />
           </IconButton>
           Sazlamalar
-          {open ? (
+          <Backdrop
+            sx={{
+              backgroundColor: "transparent",
+              color: "#fff",
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+            open={open}
+            onClick={() => setOpen(false)}
+          >
             <Stack
               position="absolute"
               minWidth={200}
               minHeight={100}
               backgroundColor="#0B57D0"
-              top={70}
+              top={65}
+              right={150}
               border="1px solid gray"
               borderRadius="10px"
               alignItems="center"
@@ -255,11 +281,17 @@ export default function Navbar() {
             >
               Sazlamalar ýerinde
             </Stack>
-          ) : (
-            ""
-          )}
+          </Backdrop>
         </Stack>
-        <Stack direction="row" alignItems="center">
+        <Link
+          to="/account"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            textDecoration: "none",
+          }}
+        >
           <IconButton
             sx={{
               transition: "all ease-in-out 0.2s",
@@ -271,7 +303,7 @@ export default function Navbar() {
           <Typography color="#fff" fontWeight={600}>
             {admin.user.email.toUpperCase()}
           </Typography>
-        </Stack>
+        </Link>
       </Stack>
     </Box>
   );

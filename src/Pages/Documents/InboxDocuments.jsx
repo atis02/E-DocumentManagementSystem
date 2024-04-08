@@ -64,7 +64,7 @@ export default function InboxDocuments() {
   };
 
   return (
-    <Box height="100%" width="100%">
+    <Box height="100vh" overflow="scroll" width="100%">
       <Stack p="20px 30px">
         <Stack
           direction="row"

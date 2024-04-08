@@ -171,7 +171,22 @@ export default function NewDocument() {
     boxShadow: 4,
     p: 1,
   };
-
+  const clear = () => {
+    (newTextFieldRef.current.value = ""),
+      setType(""),
+      setValue(dayjs()),
+      setValue2(dayjs()),
+      (descTextFieldRef.current.value = ""),
+      setStepUser([
+        {
+          id: admin.user.id,
+          values: [admin.user.fullName],
+          valuesDesc,
+          subStepper: [],
+        },
+      ]),
+      setFiles([]);
+  };
   const handleDelete2 = (id) => {
     const updatedStep =
       id !== admin.id ? stepUser.filter((x) => x.id !== id) : stepUser;
@@ -180,8 +195,9 @@ export default function NewDocument() {
   const handleSubmit = (e) => {
     type === "" ||
     newTextFieldRef.current.value === "" ||
+    stepUser.length <= 1 ||
     textFieldRef.current.value > textFieldRef2.current.value
-      ? toast.error("Invalid data")
+      ? toast.error("Maglumatlar nädogry")
       : dbDoc.push({
           ...formData,
           id: Math.floor(Math.random() * 1000),
@@ -198,11 +214,11 @@ export default function NewDocument() {
           status: "Barlagda",
         }) &&
         toast.success("Document succesfully registered!") &&
-        setFormData("");
+        clear();
   };
-
+  console.log(stepUser);
   return (
-    <Box width="100%">
+    <Box width="100%" maxHeight="100vh" overflow="scroll">
       <Toaster />
       <Typography p="20px" fontSize="30px" fontWeight="600">
         Täze Resminama
@@ -292,7 +308,7 @@ export default function NewDocument() {
                         helperText:
                           textFieldRef.current.value >
                           textFieldRef2.current.value
-                            ? "Send data can`t be large than due data!"
+                            ? "Seretmeli möhletden öňde bolup bilmeýär!"
                             : "",
                       },
                     }}
@@ -321,10 +337,10 @@ export default function NewDocument() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={2}>
             <Typography width="30%" textAlign="end">
-              Kimden
+              Kimden:
             </Typography>
             <Typography width="100%" textAlign="start">
-              A. Ikramow
+              {admin.user.fullName}
             </Typography>
           </Stack>
           <Stack direction="row" alignItems="center" spacing={2}></Stack>
@@ -348,7 +364,12 @@ export default function NewDocument() {
               Goşmaça Maglumatlar
             </Typography>
             <Divider />
-            <Box sx={{ maxWidth: 600, mt: "30px" }}>
+            <Box
+              sx={{
+                maxWidth: 600,
+                mt: "30px",
+              }}
+            >
               <Toaster />
               <Stepper
                 activeStep={activeStep}
@@ -358,13 +379,16 @@ export default function NewDocument() {
                 {stepUser.map((step, index) => (
                   <Step
                     sx={{
+                      ...(stepUser.length <= 1
+                        ? { border: "1px solid red" }
+                        : ""),
                       ...(activeStep === index
                         ? { background: "lightgray" }
                         : ""),
                     }}
                     key={step.id}
                   >
-                    <StepLabel>
+                    <StepLabel className="step">
                       <Typography fontSize="20px" fontWeight={600}>
                         {step.values}
                       </Typography>
