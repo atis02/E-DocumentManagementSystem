@@ -104,14 +104,18 @@ export default function NewDocument() {
 
   const handleSubAddStep = (e) => {
     e.preventDefault();
-
+    const num = () => {
+      for (let i = 100; i > subStepUser.length; i++) {
+        const element = subStepUser[i];
+      }
+    };
     setSubStepUser(
       subValues === ""
         ? ""
         : stepUser.map((item, index) =>
             activeStep === index
               ? item.subStepper.push({
-                  id: Math.floor(Math.random() * 1000),
+                  id: num(),
                   subValues,
                   subValuesDesc,
                 })
@@ -122,7 +126,7 @@ export default function NewDocument() {
     setSubValues("");
     setSubAddStep(null);
   };
-
+  console.log(subStepUser);
   //sub step func end
 
   const handleClose = () => setModalOpen(false);
@@ -390,7 +394,9 @@ export default function NewDocument() {
                   >
                     <StepLabel className="step">
                       <Typography fontSize="20px" fontWeight={600}>
-                        {step.values}
+                        {step.values.length >= 2
+                          ? step.values.join(" , ")
+                          : step.values}
                       </Typography>
                     </StepLabel>
                     <Stack
@@ -441,7 +447,9 @@ export default function NewDocument() {
                         }}
                         onClick={() => handleDelete2(step.id)}
                       >
-                        {step.values}
+                        {step.values.length >= 2
+                          ? step.values.join(" , ")
+                          : step.values}
                         <DeleteIcon />
                       </Button>
                     </Stack>

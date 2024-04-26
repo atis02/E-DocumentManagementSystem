@@ -147,7 +147,7 @@ export default function Navbar() {
       <Backdrop
         sx={{
           backgroundColor: "transparent",
-          color: "#fff",
+          color: "#000",
           zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
         open={openCalendar}
