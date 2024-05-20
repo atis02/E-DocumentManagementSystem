@@ -18,6 +18,7 @@ import { NavLink } from "react-router-dom";
 import ForwardToInboxIcon from "@mui/icons-material/ForwardToInbox";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import DocumentDetail from "../DocumentDetail";
+import TestDocument from "./TestDocument";
 
 export default function InboxDocuments() {
   const [open, setOpen] = useState(null);
@@ -322,6 +323,7 @@ export default function InboxDocuments() {
               <Divider />
             </Stack>
           ))}
+          <TestDocument />
         </Stack>
       </Stack>
     </Box>

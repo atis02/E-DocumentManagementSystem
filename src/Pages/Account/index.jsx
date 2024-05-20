@@ -46,9 +46,9 @@ export default function Account() {
   };
   const currentPassword = "AlemTilsimat50";
   return (
-    <Box p="20px" height="100vh" overflow="scroll">
+    <Box height="100vh" width="100%" overflow="scroll">
       <Stack>
-        <Typography fontSize="30px" fontWeight="600">
+        <Typography p="10px 20px" fontSize="30px" fontWeight="600">
           Profil
         </Typography>
         <Stack direction="column" spacing={4} m="0px 0 50px 40px">
@@ -74,7 +74,7 @@ export default function Account() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  width: "700px",
+                  minWidth: 600,
                   gap: "10px",
                 }}
               >
@@ -184,7 +184,7 @@ export default function Account() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  width: "700px",
+                  minWidth: 600,
                   gap: "10px",
                 }}
               >

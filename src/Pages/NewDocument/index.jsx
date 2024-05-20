@@ -20,7 +20,6 @@ import {
   StepContent,
   Modal,
   Autocomplete,
-  createFilterOptions,
 } from "@mui/material";
 import { Dropzone, FileMosaic } from "@files-ui/react";
 import toast, { Toaster } from "react-hot-toast";

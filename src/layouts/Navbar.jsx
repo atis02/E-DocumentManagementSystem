@@ -156,7 +156,7 @@ export default function Navbar() {
         <Stack
           position="absolute"
           top={70}
-          left={900}
+          left="30%"
           backgroundColor="#fff"
           zIndex={30}
           borderRadius="10px"
