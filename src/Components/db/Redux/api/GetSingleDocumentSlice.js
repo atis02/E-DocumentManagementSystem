@@ -11,11 +11,10 @@ const initialState = {
 };
 // Create an async thunk for the GET request
 
-const userID = JSON.parse(localStorage.getItem("user"));
-
 export const getDocumentById = createAsyncThunk(
   "userGetDocumentById/getDocumentById",
   async (id, { rejectWithValue }) => {
+    const userID = JSON.parse(localStorage.getItem("user"));
     try {
       const response = await AxiosInstance.get(
         `docs/get-item-doc?userId=${userID.id}&documentId=${id}`
@@ -24,8 +23,8 @@ export const getDocumentById = createAsyncThunk(
 
       return response.data.document;
     } catch (error) {
-      toast.error("Failed to fetch document");
       console.log(error.response.data);
+      toast.error("Failed to fetch document");
 
       return rejectWithValue(error.response.data);
     }

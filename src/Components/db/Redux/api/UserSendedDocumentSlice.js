@@ -35,7 +35,6 @@ const SendedDocuments = createSlice({
       .addCase(userSendedDocuments.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.data = action.payload;
-        state.meta = action.payload.meta;
       })
       .addCase(userSendedDocuments.rejected, (state, action) => {
         state.loading = false;

@@ -352,7 +352,15 @@ export default function Navbar() {
               "&:hover": { backgroundColor: "#424242" },
             }}
           >
-            <Avatar src="/broken-image.jpg" sx={{ background: "blue" }} />
+            <Avatar
+              alt={admin.firstname}
+              src={
+                admin.img === null
+                  ? admin.firstname[0]
+                  : `https://alemdocs.alemtilsimat.com/api/static/profil/${admin.img}`
+              }
+              sx={{ background: "blue" }}
+            />
           </IconButton>
           <Typography
             color="#fff"
@@ -361,7 +369,6 @@ export default function Navbar() {
             fontWeight={600}
           >
             {admin.firstname[0].toUpperCase()}.{admin.surname.toUpperCase()}
-            {/* A.Ikramow */}
           </Typography>
         </Link>
         <Stack

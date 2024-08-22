@@ -34,20 +34,16 @@ const DocumentDetail = () => {
   const [documentVersion, setDocumentVersion] = useState(false);
   const [file, setFile] = useState(null);
   const [fileInfo, setFileInfo] = useState([]);
-
   const data = useSelector((state) => state.userGetDocumentById.data);
   const status = useSelector((state) => state.userGetDocumentById.status);
   const error = useSelector((state) => state.userGetDocumentById.error);
-
   const dispatch = useDispatch();
   const admin = JSON.parse(localStorage.getItem("user"));
   const { id } = useParams();
   console.log(file);
-
   useEffect(() => {
     dispatch(getDocumentById(id));
   }, [dispatch, id]);
-
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -67,7 +63,6 @@ const DocumentDetail = () => {
   };
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
-
   const style = {
     position: "absolute",
     top: "50%",
@@ -86,10 +81,6 @@ const DocumentDetail = () => {
   const handleVersion = () => {
     setDocumentVersion(!documentVersion);
     setDocumentDetail(false);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
   const getIdOfTrue = () => {
     const sharedDocs = data.sharedDocuments || [];
@@ -129,12 +120,11 @@ const DocumentDetail = () => {
     return null;
   };
   const queueStepUserID = findQueue();
-
   const handleNextDocument = (docId) => {
     const body = new FormData();
     body.append("file", file);
     body.append("documentId", docId);
-    body.append("userId", queueStepUserID.nextRecipientId);
+    body.append("userId", IdOfTrue.recipientId);
     body.append(
       "shareDocUpdate",
       JSON.stringify([
@@ -157,7 +147,6 @@ const DocumentDetail = () => {
     dispatch(updateDocument({ body, id }));
     handleClose();
   };
-  console.log(data);
   const handleNextWithoutFile = (docId) => {
     const body = {
       shareDocUpdate: [
@@ -181,6 +170,77 @@ const DocumentDetail = () => {
     dispatch(updateDocumentWithoutFile({ body, id }));
     handleClose();
   };
+  const findPrevQueue = () => {
+    const sharedDocs = data.sharedDocuments || [];
+    for (const sharedDoc of sharedDocs) {
+      if (sharedDoc.queue === queueValue - 1) {
+        return {
+          id: sharedDoc.id,
+          nextRecipientId: sharedDoc.recipientId,
+          queue: sharedDoc.queue,
+        };
+      }
+    }
+    return null;
+  };
+  const prevQueue = findPrevQueue();
+  const handlePrevDocument = (docId) => {
+    const body = new FormData();
+    body.append("file", file);
+    body.append("documentId", docId);
+    body.append("userId", IdOfTrue.recipientId);
+    body.append(
+      "shareDocUpdate",
+      JSON.stringify([
+        {
+          recipientId: IdOfTrue.recipientId,
+          status: false,
+          queue: IdOfTrue.queue,
+          id: IdOfTrue.id,
+          documentId: docId,
+        },
+        {
+          recipientId: prevQueue.nextRecipientId,
+          status: true,
+          queue: prevQueue.queue,
+          id: prevQueue.id,
+          documentId: docId,
+        },
+      ])
+    );
+    dispatch(updateDocument({ body, id }));
+    handleClose();
+  };
+  const handlePrevWithoutFile = (docId) => {
+    const body = {
+      shareDocUpdate: [
+        {
+          recipientId: IdOfTrue.recipientId,
+          status: false,
+          queue: IdOfTrue.queue,
+          id: IdOfTrue.id,
+          documentId: docId,
+        },
+        {
+          recipientId: prevQueue.nextRecipientId,
+          status: true,
+          queue: prevQueue.queue,
+          id: prevQueue.id,
+          documentId: docId,
+        },
+      ],
+    };
+
+    dispatch(updateDocumentWithoutFile({ body, id }));
+    handleClose();
+  };
+  const lastElement =
+    status === "succeeded" &&
+    data.sharedDocuments &&
+    data.sharedDocuments.length > 0 &&
+    data.sharedDocuments[data.sharedDocuments.length - 1];
+  console.log(lastElement.status);
+
   return (
     <Box height="100vh" overflow="scroll" width="100%">
       <Stack p="20px">
@@ -202,7 +262,11 @@ const DocumentDetail = () => {
         toast.error(error)
       ) : status === "succeeded" ? (
         <Stack p="15px" spacing={2}>
-          <Stack key={data.id} direction="row" justifyContent="space-between">
+          <Stack
+            key={status === "succeeded" && data.id}
+            direction="row"
+            justifyContent="space-between"
+          >
             <Stack direction="column" m="0 25px 0 20px" width="25%">
               <Stack mt={5} spacing={3}>
                 <Typography minWidth="100px" textAlign="start">
@@ -231,18 +295,12 @@ const DocumentDetail = () => {
                   {data.description}
                 </Typography>
               </Stack>
-
               <Box sx={{ maxWidth: 600, mt: "30px" }}>
                 <Toaster />
                 <Typography minWidth="100px" fontSize={20} textAlign="center">
                   Kabul edijiler:
                 </Typography>
-
-                <Stepper
-                  activeStep={null}
-                  // activeStep={activeStep.map((elem) => elem.queue)}
-                  orientation="vertical"
-                >
+                <Stepper activeStep={null} orientation="vertical">
                   {data.sharedDocuments && data.sharedDocuments.length > 0
                     ? data.sharedDocuments.map((step, index) => (
                         <Step
@@ -337,11 +395,22 @@ const DocumentDetail = () => {
                                 variant="outlined"
                                 color="error"
                                 disabled={index === 0}
-                                onClick={handleBack}
+                                onClick={() => {
+                                  file === null
+                                    ? handlePrevWithoutFile(data.id)
+                                    : handlePrevDocument(data.id);
+                                }}
                                 sx={{ mt: 1, mr: 1 }}
                               >
                                 Yzyna
                               </Button>
+                              {lastElement.status === true ? (
+                                <Button variant="outlined" color="success">
+                                  Finish
+                                </Button>
+                              ) : (
+                                ""
+                              )}
                             </Box>
                           </Stack>
 
@@ -453,7 +522,7 @@ const DocumentDetail = () => {
                   </Stack>
                   <Divider sx={{ width: "80%" }} />
                   <iframe
-                    src={`http://localhost:3322/public/docs/${data.path}`}
+                    src={`https://alemdocs.alemtilsimat.com/api/static/docs/${data.path}`}
                     style={{
                       border: "none",
                       width: "100%",
@@ -496,7 +565,11 @@ const DocumentDetail = () => {
                         >
                           {elem.path}
                         </Typography>
-                        <a href={elem.path} download={elem.path}>
+                        <a
+                          href={`https://alemdocs.alemtilsimat.com/api/static/docs/${elem.path}`}
+                          download={elem.name}
+                          // target="_blank"
+                        >
                           <Button variant="contained">
                             Download File
                             <ArrowDownwardIcon />

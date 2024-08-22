@@ -447,7 +447,7 @@ const DocumentDetail = () => {
                     </Stack>
                     <Divider sx={{ width: "80%" }} />
                     <iframe
-                      src={`http://localhost:3322/public/docs/${item.path}`}
+                      src={`https://alemdocs.alemtilsimat.com/api/static/docs/${item.path}`}
                       style={{
                         border: "none",
                         width: "100%",
@@ -490,7 +490,10 @@ const DocumentDetail = () => {
                           >
                             {elem.path}
                           </Typography>
-                          <a href={elem.path} download={elem.path}>
+                          <a
+                            href={`https://alemdocs.alemtilsimat.com/api/static/docs/${elem.path}`}
+                            download={elem.name}
+                          >
                             <Button variant="contained">
                               Download File
                               <ArrowDownwardIcon />

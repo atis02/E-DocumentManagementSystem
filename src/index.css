@@ -79,9 +79,29 @@ background: #c6c6c6;
 .file-input-label:hover{
   background-color:#a6c6df ;
 }
+.file-input2 {
+  position: absolute;
+  opacity: 0;
+  z-index: 10;
+}
+.file-input-label2 {
+  z-index: 10;
+  display: none;
+  position:absolute;
+  margin-right: -155px;
+  margin-top: -20px;
+  right: 50%; 
+  width: 100px;
+  height:100px;
+  cursor: pointer;
+  font-size: 16px;
+  background-image: url('/images/camera.png');
+  background-size: 40% 35%;
+  background-repeat: no-repeat;
+  transition: all ease 0.4s;
+  background-color: transparent;
 
-
-
+}
 
 
 .pl { 

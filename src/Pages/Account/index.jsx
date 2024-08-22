@@ -14,11 +14,18 @@ import {
   Typography,
   Zoom,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import QRCodeComponent from "./components/QRCodeComponent";
 import { Users } from "../../Components/db/users";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getImg,
+  updateImg,
+} from "../../Components/db/Redux/api/ImageUpdateSlice";
+import AxiosInstance from "../../Components/db/Redux/api/AxiosHelper";
+import axios from "axios";
 
 export default function Account() {
   // const admin = JSON.parse(localStorage.getItem("token") || "[]");
@@ -36,7 +43,8 @@ export default function Account() {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordAgain, setNewPasswordAgain] = useState("");
-
+  const [file, setFile] = useState(null);
+  const [img, setImg] = useState("");
   const [loading, setLoading] = useState(false);
   const handleClickShowPassword = () => {
     setShowPassword((show) => !show);
@@ -48,6 +56,40 @@ export default function Account() {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  const data = useSelector((state) => state.imgAccount.data);
+  const status = useSelector((state) => state.imgAccount.status);
+  const error = useSelector((state) => state.imgAccount.error);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const userImg = async () =>
+      await axios
+        .get(
+          `https://alemdocs.alemtilsimat.com/api/static/profil/${
+            file !== null ? file.name : admin.img
+          }`
+        )
+        .then((res) => {
+          console.log(res);
+
+          setImg(res.config.url);
+        });
+    userImg();
+  }, []);
+  const handleUpdateImg = () => {
+    const body = new FormData();
+    body.append("file", file);
+    body.append("id", admin.id);
+    dispatch(updateImg(body));
+  };
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+  console.log(img);
+
   const currentPassword = "AlemTilsimat50";
   return (
     <Box
@@ -70,13 +112,40 @@ export default function Account() {
           boxShadow=" 0px 0px 15px -2px rgba(0,0,0,0.75)"
         >
           <Stack alignItems="center">
-            <IconButton>
+            <IconButton
+              sx={{ "&:hover .file-input-label2": { display: "block" } }}
+            >
+              <Stack position="relative" display="inline-block">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  id="file"
+                  className="file-input2"
+                />
+                <label for="file" className="file-input-label2"></label>
+              </Stack>
               <Avatar
-                alt="Remy Sharp"
-                // src={profilePhoto}
+                alt={admin.firstname}
+                src={
+                  data === null
+                    ? admin.firstname[0]
+                    : `https://alemdocs.alemtilsimat.com/api/static/profil/${admin.img}`
+                }
                 sx={{ width: 150, height: 150, background: "gray" }}
               />
             </IconButton>
+            {file !== null ? file.name : ""}
+            {file !== null ? (
+              <Button
+                onClick={handleUpdateImg}
+                variant="outlined"
+                color="success"
+              >
+                Üýtgetmek
+              </Button>
+            ) : (
+              ""
+            )}
             <Typography fontSize={30} mb={2} fontWeight={600}>
               {admin.firstName}
             </Typography>

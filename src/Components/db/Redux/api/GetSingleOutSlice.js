@@ -11,11 +11,10 @@ const initialState = {
 };
 // Create an async thunk for the GET request
 
-const userID = JSON.parse(localStorage.getItem("user"));
-
 export const getOutDocumentById = createAsyncThunk(
   "userGetDocumentById/getOutDocumentById",
   async (id, { rejectWithValue }) => {
+    const userID = JSON.parse(localStorage.getItem("user"));
     try {
       const response = await AxiosInstance.get(
         `docs/sender-item-doc?senderId=${userID.id}&documentId=${id}`
