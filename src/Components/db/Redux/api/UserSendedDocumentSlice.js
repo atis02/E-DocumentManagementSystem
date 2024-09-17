@@ -13,8 +13,6 @@ export const userSendedDocuments = createAsyncThunk(
   "userSendedDocuments",
   async () => {
     const userID = JSON.parse(localStorage.getItem("user"));
-    console.log(userID.id);
-
     const response = await AxiosInstance.get(`docs/send/${userID.id}`);
     return response.data;
   }

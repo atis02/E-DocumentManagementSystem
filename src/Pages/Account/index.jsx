@@ -31,7 +31,6 @@ export default function Account() {
   // const admin = JSON.parse(localStorage.getItem("token") || "[]");
 
   const admin = JSON.parse(localStorage.getItem("user"));
-  console.log(admin);
 
   const [email, setEmail] = useState(admin.firstname);
   const [lastName, setLastName] = useState(admin.surname);
@@ -70,8 +69,6 @@ export default function Account() {
           }`
         )
         .then((res) => {
-          console.log(res);
-
           setImg(res.config.url);
         });
     userImg();
@@ -88,7 +85,6 @@ export default function Account() {
       setFile(selectedFile);
     }
   };
-  console.log(img);
 
   const currentPassword = "AlemTilsimat50";
   return (
@@ -122,7 +118,7 @@ export default function Account() {
                   id="file"
                   className="file-input2"
                 />
-                <label for="file" className="file-input-label2"></label>
+                <label htmlFor="file" className="file-input-label2"></label>
               </Stack>
               <Avatar
                 alt={admin.firstname}

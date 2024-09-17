@@ -8,6 +8,8 @@ import NextDocumentSlice from "./NextDocumentSlice";
 import GetSingleOutSlice from "./GetSingleOutSlice";
 import getDocTypeSlice from "./DocTypeSlice";
 import ImageUpdateSlice from "./ImageUpdateSlice";
+import FinishDocumentSlice from "./FinishDocumentSlice";
+import UserSlice from "./UserSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +22,7 @@ export const store = configureStore({
     nextDocument: NextDocumentSlice,
     getDocTypes: getDocTypeSlice,
     imgAccount: ImageUpdateSlice,
+    finishDoc: FinishDocumentSlice,
+    users: UserSlice,
   },
 });

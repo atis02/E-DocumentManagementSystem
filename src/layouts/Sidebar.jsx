@@ -49,11 +49,88 @@ import { userSendedDocuments } from "../Components/db/Redux/api/UserSendedDocume
 import AxiosInstance from "../Components/db/Redux/api/AxiosHelper";
 
 export default function SidebarNav(data, sendingData) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(JSON.parse(localStorage.getItem("open")));
 
   const handleOpen = () => {
-    setOpen(!open);
+    setOpen(true);
+    localStorage.setItem("open", true);
   };
+  const handleClose = () => {
+    setOpen(false);
+    localStorage.setItem("open", false);
+  };
+
+  [
+    {
+      document: {
+        id: "9050a233-c69d-4c1f-a074-8fd33ac088b9",
+        name: "Sertnama",
+        path: "1724321502975ÐÐ¾Ð´ÑÐ»Ð¸.docx.pdf",
+        startTime: "2024-08-22",
+        endTime: "2024-08-30",
+        description: "Sertnamany barlaga ugratyan",
+        statusType: "FINISHED",
+        docType: {
+          id: "d01af382-72ba-46ec-a392-82dd8c05322c",
+          name: "Şertnama",
+        },
+        sharedDocuments: [
+          {
+            recipientId: "5291271e-670b-4386-ae57-6b9516e798d6",
+            status: false,
+            queue: 1,
+            id: "00329ad4-11dd-42de-8f1a-891b27b7b803",
+            documentId: "f1f99505-f1ad-46d7-84ed-975f37a5168f",
+            recipient: {
+              id: "5291271e-670b-4386-ae57-6b9516e798d6",
+              login: "Atamyrat",
+              role: "USER",
+              surname: "Ikramow",
+              firstname: "Atamyrat",
+              email: "atamyrat@gmail.com",
+              phoneNumber: "+99366778899",
+              img: "1724324569391mentor 2.png",
+            },
+          },
+        ],
+      },
+    },
+    {
+      document: {
+        id: "9050a233-c69d-4c1f-a074-8fd33ac088b9",
+        name: "Sertnama",
+        path: "1724321502975ÐÐ¾Ð´ÑÐ»Ð¸.docx.pdf",
+        startTime: "2024-08-22",
+        endTime: "2024-08-30",
+        description: "Sertnamany barlaga ugratyan",
+        statusType: "FINISHED",
+        docType: {
+          id: "d01af382-72ba-46ec-a392-82dd8c05322c",
+          name: "Şertnama",
+        },
+
+        sharedDocuments: [
+          {
+            recipientId: "5291271e-670b-4386-ae57-6b9516e798d6",
+            status: false,
+            queue: 1,
+            id: "6247e12e-1f13-447f-a7a5-de31e768b8cb",
+            documentId: "9050a233-c69d-4c1f-a074-8fd33ac088b9",
+            recipient: {
+              id: "5291271e-670b-4386-ae57-6b9516e798d6",
+              login: "Atamyrat",
+              role: "USER",
+              surname: "Ikramow",
+              firstname: "Atamyrat",
+              email: "atamyrat@gmail.com",
+              phoneNumber: "+99366778899",
+              img: "1724324569391mentor 2.png",
+            },
+          },
+        ],
+      },
+    },
+  ];
   const stateDocs = useSelector((state) => state.sendedDocs);
   const DeletedDocs = JSON.parse(localStorage.getItem("deletedDocs")) || [];
   const navigate = useNavigate();
@@ -67,7 +144,8 @@ export default function SidebarNav(data, sendingData) {
     localStorage.removeItem("user");
     window.location.reload();
     setTimeout(() => navigate("/login"), 1000),
-      toast.success("Succesfully Logout!");
+      toast.success("Üstünlikli çykdyňyz!");
+    localStorage.removeItem("documentNotificationShown");
   };
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -101,10 +179,9 @@ export default function SidebarNav(data, sendingData) {
         className="sidebar"
         style={{
           minHeight: "100vh",
-          ...(open
+          ...(open === true
             ? {
                 minWidth: "250px",
-
                 width: { ...(isMobile ? "150px" : "250px") },
               }
             : {
@@ -117,7 +194,7 @@ export default function SidebarNav(data, sendingData) {
       >
         <Stack>
           <Stack
-            sx={{ ...(open ? "" : { flexDirection: "column" }) }}
+            sx={{ ...(open === true ? "" : { flexDirection: "column" }) }}
             height="54px"
             direction="row"
             alignItems="center"
@@ -125,11 +202,14 @@ export default function SidebarNav(data, sendingData) {
             m="20px 30px"
           >
             <Link style={{ textDecoration: "none" }} to="/">
-              <ToastContainer />
               <Typography
                 color="#F3F3F4"
                 fontWeight="700"
-                sx={{ ...(open ? { fontSize: "30px" } : { fontSize: "18px" }) }}
+                sx={{
+                  ...(open === true
+                    ? { fontSize: "30px" }
+                    : { fontSize: "18px" }),
+                }}
                 textAlign="center"
                 fontFamily="Montserrat"
               >
@@ -139,7 +219,7 @@ export default function SidebarNav(data, sendingData) {
             <IconButton
               sx={{
                 color: "#F3F3F4",
-                ...(open
+                ...(open === true
                   ? ""
                   : {
                       width: "30px",
@@ -147,7 +227,7 @@ export default function SidebarNav(data, sendingData) {
                       backgroundColor: "#5C9FE3",
                     }),
               }}
-              onClick={handleOpen}
+              onClick={() => (open === true ? handleClose() : handleOpen())}
             >
               {" "}
               <MenuOpenIcon />
@@ -173,9 +253,9 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Baş sahypa" : ""}
+              {open === true ? "Baş sahypa" : ""}
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               component={<NavLink className="sideNav" to="/dashboard" />}
               icon={
                 <Tooltip
@@ -188,71 +268,58 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Dolandyryş" : ""}
-            </MenuItem>
-            {open ? (
+              {open === true ? "Dolandyryş" : ""}
+            </MenuItem> */}
+            {open === true ? (
               <>
-                <SubMenu
-                  title="Submenu"
-                  label="Resminamalar"
-                  className="sideNav"
+                <MenuItem
+                  icon={
+                    <Badge badgeContent={data.data.length} color="primary">
+                      <ArchiveIcon />
+                    </Badge>
+                  }
+                  component={
+                    <NavLink className="sideNav" to="/document/inbox" />
+                  }
+                >
+                  Gelen Resminamalar
+                </MenuItem>
+                <MenuItem
                   icon={
                     <Badge
-                      badgeContent={data.data.length + data.sendingData.length}
-                      color="primary"
+                      badgeContent={data.sendingData.length}
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          backgroundColor: "gray",
+                          color: "white",
+                        },
+                      }}
                     >
-                      <EmailIcon />
+                      <UnarchiveIcon />
+                    </Badge>
+                  }
+                  component={<NavLink className="sideNav" to="/document/out" />}
+                >
+                  Giden Resminamalar
+                </MenuItem>
+                <MenuItem
+                  component={
+                    <NavLink className="sideNav" to="/document/archive" />
+                  }
+                  icon={
+                    <Badge badgeContent={0} color="gray">
+                      <AutoStoriesIcon />
                     </Badge>
                   }
                 >
-                  <MenuItem
-                    icon={
-                      <Badge badgeContent={data.data.length} color="primary">
-                        <ArchiveIcon />
-                      </Badge>
-                    }
-                    component={
-                      <NavLink className="sideNav2" to="/document/inbox" />
-                    }
-                  >
-                    Gelen
-                  </MenuItem>
-                  <MenuItem
-                    icon={
-                      <Badge
-                        badgeContent={data.sendingData.length}
-                        color="primary"
-                      >
-                        <UnarchiveIcon />
-                      </Badge>
-                    }
-                    component={
-                      <NavLink className="sideNav2" to="/document/out" />
-                    }
-                  >
-                    Giden
-                  </MenuItem>
-                  <MenuItem
-                    component={
-                      <NavLink className="sideNav2" to="/document/archive" />
-                    }
-                    icon={
-                      <Badge badgeContent={0} color="primary">
-                        <AutoStoriesIcon />
-                      </Badge>
-                    }
-                  >
-                    Arhiw
-                  </MenuItem>
-                  <MenuItem
-                    component={
-                      <NavLink className="sideNav2" to="/document/new" />
-                    }
-                    icon={<NoteAddIcon />}
-                  >
-                    Täze Resminama
-                  </MenuItem>
-                </SubMenu>
+                  Arhiw
+                </MenuItem>
+                <MenuItem
+                  component={<NavLink className="sideNav" to="/document/new" />}
+                  icon={<NoteAddIcon />}
+                >
+                  Täze Resminama
+                </MenuItem>
               </>
             ) : (
               <>
@@ -337,7 +404,7 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Söhbetdeşlik" : ""}
+              {open === true ? "Söhbetdeşlik" : ""}
             </MenuItem>
             <MenuItem
               component={<NavLink className="sideNav" to="/account" />}
@@ -352,23 +419,9 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Profil" : ""}
+              {open === true ? "Profil" : ""}
             </MenuItem>
-            <MenuItem
-              component={<NavLink className="sideNav" to="/orders" />}
-              icon={
-                <Tooltip
-                  TransitionComponent={Zoom}
-                  title="Buýruklar"
-                  arrow
-                  placement="right"
-                >
-                  <BorderColorIcon />
-                </Tooltip>
-              }
-            >
-              {open ? "Buýruklar" : ""}
-            </MenuItem>
+
             <MenuItem
               component={<NavLink className="sideNav" to="/employees" />}
               icon={
@@ -382,7 +435,7 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Işgärler" : ""}
+              {open === true ? "Işgärler" : ""}
             </MenuItem>
             <MenuItem
               component={<NavLink className="sideNav" to="/notifications" />}
@@ -397,7 +450,7 @@ export default function SidebarNav(data, sendingData) {
                 </Tooltip>
               }
             >
-              {open ? "Bildirişler" : ""}
+              {open === true ? "Bildirişler" : ""}
             </MenuItem>
           </Menu>
         </Stack>

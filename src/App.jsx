@@ -19,24 +19,22 @@ import NewDocument from "./Pages/NewDocument";
 import DocumentDetail from "./Pages/DocumentDetail";
 import DocumentDetailOut from "./Pages/DocumentDetailOut";
 import ArchiveDocuments from "./Pages/Documents/ArchiveDocuments";
-import Orders from "./Pages/Orders";
 import Chat from "./Pages/Chat";
 import Login from "./layouts/LogIn";
-import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import { store } from "./Components/db/Redux/api/store";
-import { toast } from "react-toastify";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Register from "./layouts/Register";
+import { Stack } from "@mui/material";
 
 function App() {
   const ProtectedRoute = ({ children }) => {
-    const isLoggedIn = localStorage.getItem("token");
+    const isLoggedIn = localStorage.getItem("CRM_USER");
 
     if (!isLoggedIn) {
       return <Navigate to="/login" replace />; // Redirect to login on unauthorized access
     }
     return children; // Render child component if logged in
   };
+  const LandingPageLayout = lazy(() => import("./layouts/LandingPageLayout"));
 
   const router = createBrowserRouter([
     {
@@ -59,10 +57,10 @@ function App() {
           path: "/",
           element: <Main />,
         },
-        {
-          path: "/dashboard",
-          element: <Dashboard />,
-        },
+        // {
+        //   path: "/dashboard",
+        //   element: <Dashboard />,
+        // },
 
         {
           path: "/account",
@@ -96,10 +94,7 @@ function App() {
           path: "/chat",
           element: <Chat />,
         },
-        {
-          path: "/orders",
-          element: <Orders />,
-        },
+
         {
           path: "/employees",
           element: <Employees />,
@@ -112,7 +107,21 @@ function App() {
     },
   ]);
 
-  return <RouterProvider router={router} style={{ minHeight: "100vh" }} />;
+  return (
+    <Suspense
+      fallback={
+        <Stack justifyContent="center" alignItems="center" height="100vh">
+          <img
+            src="/images/spinner.svg"
+            style={{ width: 60, height: 60 }}
+            alt="loader"
+          />
+        </Stack>
+      }
+    >
+      <RouterProvider router={router} style={{ minHeight: "100vh" }} />
+    </Suspense>
+  );
 }
 
 export default App;

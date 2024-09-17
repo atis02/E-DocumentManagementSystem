@@ -16,11 +16,10 @@ export const getImg = createAsyncThunk("getImg", async () => {
   return user.img;
 });
 export const updateImg = createAsyncThunk("updateImg", async (body) => {
-    const resp = await AxiosInstance.post(`/user/updata-img`, body);
-    resp.data.message == "User profil photo updated successfully"
-      ? toast.success("Üstünlikli döredildi!")
-      : toast.error("Şowsuz!");
-    console.log(resp.data);
+  const resp = await AxiosInstance.post(`/user/updata-img`, body);
+  resp.data.message == "User profil photo updated successfully"
+    ? toast.success("Üstünlikli döredildi!")
+    : toast.error("Şowsuz!");
 
   return resp;
 });

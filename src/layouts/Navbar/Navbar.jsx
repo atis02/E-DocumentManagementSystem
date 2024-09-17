@@ -28,7 +28,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../Components/db/Redux/api/store";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
-import { ToastContainer, toast } from "react-toastify";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import {
   MenuItem,
@@ -439,7 +438,6 @@ export default function Navbar() {
                     m="0px 30px"
                   >
                     <Link style={{ textDecoration: "none" }} to="/">
-                      <ToastContainer />
                       <Typography
                         color="#F3F3F4"
                         fontWeight="700"

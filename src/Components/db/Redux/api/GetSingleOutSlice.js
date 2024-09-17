@@ -41,7 +41,6 @@ const userGetDocumentById = createSlice({
       })
       .addCase(getOutDocumentById.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log(action.payload);
 
         state.data = action.payload;
       })

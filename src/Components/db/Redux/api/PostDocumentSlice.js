@@ -22,16 +22,16 @@ export const createDocument = createAsyncThunk(
     try {
       const resp = await AxiosInstance.post("/docs/share", body);
       if (resp.status === 200) {
-        toast.success("Document created successfully");
+        toast.success("Resminama üstünlikli döredildi!");
         // Optionally dispatch an action to refresh documents list
         dispatch(getDocument());
         dispatch(userSendedDocuments()); // Refresh documents list if needed
       } else {
-        toast.warn("Error creating document");
+        toast.warn("Ýalňyşlyk");
       }
       return resp.data;
     } catch (error) {
-      toast.error("Failed to create document");
+      toast.error("Ýalňyşlyk!");
       return rejectWithValue(error.response?.data || error.message);
     }
   }

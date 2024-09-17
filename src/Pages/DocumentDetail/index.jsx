@@ -20,6 +20,9 @@ import { useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import EditIcon from "@mui/icons-material/Edit";
+import CheckIcon from "@mui/icons-material/Check";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getDocumentById } from "../../Components/db/Redux/api/GetSingleDocumentSlice";
@@ -28,8 +31,10 @@ import {
   updateDocument,
   updateDocumentWithoutFile,
 } from "../../Components/db/Redux/api/NextDocumentSlice";
+import { finishDocument } from "../../Components/db/Redux/api/FinishDocumentSlice";
+import { getCleanedFilename } from "../../Components/db/getFileName";
 const DocumentDetail = () => {
-  const [documentDetail, setDocumentDetail] = useState(false);
+  const [documentDetail, setDocumentDetail] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [documentVersion, setDocumentVersion] = useState(false);
   const [file, setFile] = useState(null);
@@ -40,7 +45,6 @@ const DocumentDetail = () => {
   const dispatch = useDispatch();
   const admin = JSON.parse(localStorage.getItem("user"));
   const { id } = useParams();
-  console.log(file);
   useEffect(() => {
     dispatch(getDocumentById(id));
   }, [dispatch, id]);
@@ -49,7 +53,8 @@ const DocumentDetail = () => {
     if (selectedFile) {
       setFile(selectedFile);
       setFileInfo(
-        `File name: ${selectedFile.name}, File size: ${
+        `Faýl ady: ${selectedFile.name}, 
+        Faýl göwrümi: ${
           selectedFile.size > 1000000000
             ? selectedFile.size / 1000000000 + "GB"
             : selectedFile.size > 1000000
@@ -68,11 +73,13 @@ const DocumentDetail = () => {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
+    width: "25%",
+    height: "35%",
+    bgcolor: "#fff",
     border: "1px solid #000",
-    boxShadow: 4,
-    p: 1,
+    boxShadow: 1,
+    borderRadius: 7,
+    p: 2,
   };
   const handleDocument = () => {
     setDocumentDetail(!documentDetail);
@@ -211,6 +218,7 @@ const DocumentDetail = () => {
     dispatch(updateDocument({ body, id }));
     handleClose();
   };
+
   const handlePrevWithoutFile = (docId) => {
     const body = {
       shareDocUpdate: [
@@ -239,13 +247,34 @@ const DocumentDetail = () => {
     data.sharedDocuments &&
     data.sharedDocuments.length > 0 &&
     data.sharedDocuments[data.sharedDocuments.length - 1];
-  console.log(lastElement.status);
+
+  const handleFinishDocument = () => {
+    const body = {
+      recipientId: lastElement.recipientId,
+      id: lastElement.id,
+      documentId: lastElement.documentId,
+    };
+
+    dispatch(finishDocument({ body, id }));
+  };
+  const firstTrueIndex =
+    data.sharedDocuments &&
+    data.sharedDocuments.findIndex((item) => item.status === true);
+  const hasTrueStatus =
+    data.sharedDocuments &&
+    data.sharedDocuments.some((item) => item.status === true);
+  const EditIsTrue =
+    data.sharedDocuments &&
+    data.sharedDocuments
+      .map((entry) => (entry.recipientId == admin.id ? entry.permissions : [])) // Map to arrays
+      .flat() // Flatten the arrays into a single array
+      .filter((doc) => doc.key == "EDIT" && doc.value === true);
 
   return (
     <Box height="100vh" overflow="scroll" width="100%">
       <Stack p="20px">
         <Typography fontSize="30px" fontWeight="600">
-          Document
+          {data.name}
         </Typography>
       </Stack>
       {status === "loading..." ? (
@@ -259,7 +288,10 @@ const DocumentDetail = () => {
           Loading...
         </Stack>
       ) : status === "failed" ? (
-        toast.error(error)
+        <Typography fontSize="30px" textAlign="center" fontWeight="600">
+          {error}
+          {toast.error(error)}
+        </Typography>
       ) : status === "succeeded" ? (
         <Stack p="15px" spacing={2}>
           <Stack
@@ -276,7 +308,7 @@ const DocumentDetail = () => {
                 </Typography>
                 <Typography minWidth="100px" textAlign="start">
                   <span style={{ color: "gray" }}>Döredilen senesi</span> :{" "}
-                  {data.startTime}
+                  {moment(data.createdAt).format("YYYY-MM-DD HH:mm")}
                 </Typography>
                 <Typography
                   sx={{
@@ -300,151 +332,261 @@ const DocumentDetail = () => {
                 <Typography minWidth="100px" fontSize={20} textAlign="center">
                   Kabul edijiler:
                 </Typography>
-                <Stepper activeStep={null} orientation="vertical">
-                  {data.sharedDocuments && data.sharedDocuments.length > 0
-                    ? data.sharedDocuments.map((step, index) => (
-                        <Step
-                          sx={{
-                            ...(step.status === true
-                              ? { background: "lightblue", color: "#fff" }
-                              : ""),
-                          }}
-                          key={step.recipient.id}
-                        >
-                          <StepLabel>
+                {/* {data.versions && data.versions.length > 1 ? ( */}
+                {data.docType && data.docType.name === "Rassylka" ? (
+                  <Stack orientation="vertical" mt={2}>
+                    {data.sharedDocuments && data.sharedDocuments.length > 0
+                      ? data.sharedDocuments.map((step, index) => (
+                          <Stack
+                            direction="row"
+                            alignItems={"center"}
+                            spacing={2}
+                            mb={1}
+                            key={index}
+                          >
+                            <Stack
+                              borderRadius="100%"
+                              backgroundColor="blue"
+                              width={25}
+                              height={25}
+                              alignItems="center"
+                            >
+                              <Typography color="#fff">
+                                {index <= firstTrueIndex - 1 ||
+                                hasTrueStatus === false ? (
+                                  <CheckIcon />
+                                ) : (
+                                  index + 1
+                                )}
+                              </Typography>
+                            </Stack>
                             <Typography fontSize="20px" fontWeight={600}>
                               {step.recipient.firstname}{" "}
                               {step.recipient.surname}
                             </Typography>
-                          </StepLabel>
-
-                          <Stack
-                            sx={{
-                              ...(step.status === true &&
-                              admin.id === step.recipientId
-                                ? ""
-                                : { display: "none" }),
-                            }}
-                          >
-                            <Modal
-                              open={modalOpen}
-                              onClose={handleClose}
-                              aria-labelledby="modal-modal-title"
-                              aria-describedby="modal-modal-description"
-                              BackdropProps={{
-                                style: {
-                                  backgroundColor: "#7F7F7F",
-                                  opacity: "0.6",
-                                },
+                          </Stack>
+                        ))
+                      : ""}
+                  </Stack>
+                ) : (
+                  <Stack activestep={queueValue - 1} orientation="vertical">
+                    {data.sharedDocuments && data.sharedDocuments.length > 0
+                      ? data.sharedDocuments.map((step, index) => (
+                          <Stack key={index}>
+                            <Stack
+                              backgroundColor="gray"
+                              height={50}
+                              width="1px"
+                              ml={4}
+                              mb={-1.4}
+                              sx={{
+                                ...(index === 0
+                                  ? { display: "none" }
+                                  : { display: "block" }),
                               }}
+                            ></Stack>
+                            <Step
+                              sx={{
+                                ...(step.status === true
+                                  ? { background: "lightblue", color: "#fff" }
+                                  : ""),
+                                mt: "10px",
+                                borderRadius: "20px",
+                                border: "1px solid gray",
+                                p: 1,
+                                pb: 4,
+                              }}
+                              key={step.recipient.id}
                             >
-                              <Box sx={style} height="130px">
-                                <Typography textAlign="center" fontSize={22}>
-                                  {file === null
-                                    ? "Siz Resminama girizmediňiz girizilen resminama bilen ylalaşýarsyňyzmy?"
-                                    : "Resminamany ugratmak isleýärsiňizmi?"}
-                                </Typography>
+                              <StepLabel>
                                 <Stack
-                                  alignItems="center"
                                   direction="row"
-                                  justifyContent="center"
-                                  height="100%"
-                                  spacing={6}
+                                  alignItems={"center"}
+                                  justifyContent="space-between"
+                                  spacing={2}
+                                  mb={1}
                                 >
+                                  <Stack
+                                    borderRadius="100%"
+                                    backgroundColor="blue"
+                                    width={25}
+                                    height={25}
+                                    alignItems="center"
+                                  >
+                                    <Typography color="#fff">
+                                      {index <= firstTrueIndex - 1 ||
+                                      hasTrueStatus === false ? (
+                                        <CheckIcon />
+                                      ) : (
+                                        index + 1
+                                      )}
+                                    </Typography>
+                                  </Stack>
+                                  <Typography fontSize="20px" fontWeight={600}>
+                                    {step.recipient.firstname}{" "}
+                                    {step.recipient.surname}
+                                  </Typography>
+                                  <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    alignItems={"center"}
+                                  >
+                                    {step.permissions.map((item) =>
+                                      item.key == "READ" ? (
+                                        <AutoStoriesIcon key={item} />
+                                      ) : item.key == "EDIT" &&
+                                        item.value === true ? (
+                                        <EditIcon />
+                                      ) : item.key == "DELETE" ? (
+                                        ""
+                                      ) : (
+                                        ""
+                                      )
+                                    )}
+                                  </Stack>
+                                </Stack>
+                              </StepLabel>
+
+                              <Stack
+                                sx={{
+                                  ...(step.status === true &&
+                                  admin.id === step.recipientId
+                                    ? ""
+                                    : { display: "none" }),
+                                }}
+                              >
+                                <Modal
+                                  open={modalOpen}
+                                  onClose={handleClose}
+                                  aria-labelledby="modal-modal-title"
+                                  aria-describedby="modal-modal-description"
+                                  BackdropProps={{
+                                    style: {
+                                      backgroundColor: "#7F7F7F",
+                                      opacity: "0.4",
+                                    },
+                                  }}
+                                >
+                                  <Box sx={style}>
+                                    <Typography
+                                      textAlign="center"
+                                      fontSize={22}
+                                    >
+                                      {file === null
+                                        ? "Siz Resminama girizmediňiz girizilen resminama bilen ylalaşýarsyňyzmy?"
+                                        : "Resminamany ugratmak isleýärsiňizmi?"}
+                                    </Typography>
+                                    <Stack
+                                      alignItems="center"
+                                      direction="row"
+                                      justifyContent="center"
+                                      height="100%"
+                                      spacing={6}
+                                    >
+                                      <Button
+                                        sx={{
+                                          background: "green",
+                                          color: "#fff",
+                                          "&:hover": { background: "#000" },
+                                        }}
+                                        onClick={() => {
+                                          file === null
+                                            ? handleNextWithoutFile(data.id)
+                                            : handleNextDocument(data.id);
+                                        }}
+                                      >
+                                        Tassykla
+                                      </Button>
+                                      <Button
+                                        sx={{
+                                          background: "red",
+                                          color: "#fff",
+                                          "&:hover": { background: "#000" },
+                                        }}
+                                        onClick={handleClose}
+                                      >
+                                        Ret et
+                                      </Button>
+                                    </Stack>
+                                  </Box>
+                                </Modal>
+                                <Box sx={{ mb: 2 }}>
                                   <Button
-                                    sx={{
-                                      background: "green",
-                                      color: "#fff",
-                                      "&:hover": { background: "#000" },
-                                    }}
+                                    variant="outlined"
+                                    color="success"
+                                    onClick={handleOpen}
+                                    disabled={
+                                      data.sharedDocuments.length === 1 ||
+                                      index === data.sharedDocuments.length - 1
+                                    }
+                                    sx={{ mt: 1, mr: 1 }}
+                                  >
+                                    Ugratmak
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    disabled={index === 0}
                                     onClick={() => {
                                       file === null
-                                        ? handleNextWithoutFile(data.id)
-                                        : handleNextDocument(data.id);
+                                        ? handlePrevWithoutFile(data.id)
+                                        : handlePrevDocument(data.id);
                                     }}
+                                    sx={{ mt: 1, mr: 1 }}
                                   >
-                                    Tassykla
+                                    Yzyna
                                   </Button>
-                                  <Button
-                                    sx={{
-                                      background: "red",
-                                      color: "#fff",
-                                      "&:hover": { background: "#000" },
-                                    }}
-                                    onClick={handleClose}
-                                  >
-                                    Ret et
-                                  </Button>
-                                </Stack>
-                              </Box>
-                            </Modal>
-                            <Box sx={{ mb: 2 }}>
-                              <Button
-                                variant="outlined"
-                                color="success"
-                                onClick={handleOpen}
-                                disabled={
-                                  data.sharedDocuments.length === 1 ||
-                                  index === data.sharedDocuments.length - 1
-                                }
-                                sx={{ mt: 1, mr: 1 }}
-                              >
-                                Ugratmak
-                              </Button>
-                              <Button
-                                variant="outlined"
-                                color="error"
-                                disabled={index === 0}
-                                onClick={() => {
-                                  file === null
-                                    ? handlePrevWithoutFile(data.id)
-                                    : handlePrevDocument(data.id);
-                                }}
-                                sx={{ mt: 1, mr: 1 }}
-                              >
-                                Yzyna
-                              </Button>
-                              {lastElement.status === true ? (
-                                <Button variant="outlined" color="success">
-                                  Finish
-                                </Button>
-                              ) : (
-                                ""
-                              )}
-                            </Box>
-                          </Stack>
-
-                          <Accordion>
-                            <AccordionSummary
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls="panel1-content"
-                              id="panel1-header"
-                              sx={{
-                                border: "1px solid lightgray",
-                              }}
-                            >
-                              <Typography>Details</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <Typography>Description:</Typography>
-                              <Stack spacing={2} direction="row" color="gray">
-                                <Typography>Send date:</Typography>
-                                <Typography>
-                                  {new Date().getDate()}.
-                                  {new Date().getMonth() + 1}.
-                                  {new Date().getFullYear()}
-                                </Typography>
-                                <Typography>
-                                  {new Date().getHours()}:
-                                  {new Date().getMinutes()}
-                                </Typography>
+                                  {lastElement.status === true ? (
+                                    <Button
+                                      onClick={handleFinishDocument}
+                                      variant="outlined"
+                                      color="success"
+                                    >
+                                      Finish
+                                    </Button>
+                                  ) : (
+                                    ""
+                                  )}
+                                </Box>
                               </Stack>
-                            </AccordionDetails>
-                          </Accordion>
-                        </Step>
-                      ))
-                    : ""}
-                </Stepper>
+
+                              <Accordion>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls="panel1-content"
+                                  id="panel1-header"
+                                  sx={{
+                                    border: "1px solid lightgray",
+                                  }}
+                                >
+                                  <Typography>Details</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Typography>Description:</Typography>
+                                  <Stack
+                                    spacing={2}
+                                    direction="row"
+                                    color="gray"
+                                  >
+                                    <Typography>Send date:</Typography>
+                                    <Typography>
+                                      {new Date().getDate()}.
+                                      {new Date().getMonth() + 1}.
+                                      {new Date().getFullYear()}
+                                    </Typography>
+                                    <Typography>
+                                      {new Date().getHours()}:
+                                      {new Date().getMinutes()}
+                                    </Typography>
+                                  </Stack>
+                                </AccordionDetails>
+                              </Accordion>
+                            </Step>
+                          </Stack>
+                        ))
+                      : ""}
+                  </Stack>
+                )}
               </Box>
             </Stack>
             <Stack width="75%" spacing={2}>
@@ -454,7 +596,16 @@ const DocumentDetail = () => {
                 justifyContent="center"
                 spacing={2}
               >
-                <Box direction="row" justifyContent="center">
+                <Box
+                  sx={{
+                    width: "50%",
+                    ...(IdOfTrue !== null &&
+                    IdOfTrue.recipientId === admin.id &&
+                    EditIsTrue.length !== 0
+                      ? { display: "block" }
+                      : { display: "none" }),
+                  }}
+                >
                   <Stack position="relative" display="inline-block">
                     <input
                       type="file"
@@ -462,10 +613,10 @@ const DocumentDetail = () => {
                       id="file"
                       className="file-input"
                     />
-                    <label for="file" className="file-input-label"></label>
+                    <label htmlFor="file" className="file-input-label"></label>
                   </Stack>
-                  <Stack>
-                    {fileInfo.length == 0 ? "File Not selected" : fileInfo}
+                  <Stack width="60%">
+                    {fileInfo.length == 0 ? "Faýl saýlaň" : fileInfo}
                   </Stack>
                 </Box>
 
@@ -563,7 +714,8 @@ const DocumentDetail = () => {
                           minWidth="20%"
                           textAlign="center"
                         >
-                          {elem.path}
+                          {getCleanedFilename(elem.path)}
+                          {/* {elem.path} */}
                         </Typography>
                         <a
                           href={`https://alemdocs.alemtilsimat.com/api/static/docs/${elem.path}`}
@@ -571,7 +723,6 @@ const DocumentDetail = () => {
                           // target="_blank"
                         >
                           <Button variant="contained">
-                            Download File
                             <ArrowDownwardIcon />
                           </Button>
                         </a>

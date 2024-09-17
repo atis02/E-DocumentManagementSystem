@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  IconButton,
   InputAdornment,
   Stack,
   TextField,
@@ -18,7 +19,7 @@ import {
   loginSuccess,
 } from "../Components/db/Redux/reducers/AuthSlice";
 import AxiosInstance from "../Components/db/Redux/api/AxiosHelper";
-// import { jwtDecode } from "jwt-decode";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Login = () => {
   const [data, setData] = useState();
@@ -26,7 +27,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
+  const handleClickShowPassword = () => {
+    setShowPassword((show) => !show);
+  };
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
   useEffect(() => {
     setErrMsg("");
   }, [email, password]);
@@ -47,8 +55,7 @@ const Login = () => {
         dispatch(loginSuccess({ token, user }));
         localStorage.setItem("token", JSON.stringify(token));
         localStorage.setItem("user", JSON.stringify(user));
-        setTimeout(() => navigate("/"), 1000),
-          toast.success("Succesfully Log in!");
+        setTimeout(() => navigate("/"), 0), toast.success("Üstünlikli giriş");
         setLoading(false);
       }
     } catch (error) {
@@ -71,35 +78,64 @@ const Login = () => {
           backgroundColor="#3763f5"
           sx={{ display: { lg: "block", md: "block", sm: "none", xs: "none" } }}
         >
+          <Stack
+            left="30px"
+            top="30px"
+            position="absolute"
+            width={250}
+            direction="row"
+            alignItems="center"
+          >
+            <img
+              src="/images/Logo.png"
+              style={{
+                width: "85px",
+                height: "95px",
+              }}
+              alt=""
+            />
+            <Typography
+              textAlign="center"
+              color="#fff"
+              fontWeight="500"
+              fontSize={20}
+              ml={-3}
+              fontFamily="Montserrat"
+            >
+              ÄLEM TILSIMAT
+            </Typography>
+          </Stack>
           <img
             src="/images/login (2).png"
             style={{
               width: "100%",
-              height: "50%",
+              height: "49.4vh",
             }}
             alt=""
           />
           <Typography
             textAlign="center"
             color="#fff"
-            fontWeight="400"
+            fontWeight="500"
             fontSize={55}
             position="absolute"
-            top="50%"
-            right="71%"
+            top="45%"
+            left="3%"
             fontFamily="Montserrat"
           >
             ÄLEM DOCS
           </Typography>
+
           <img
             src="/images/login (1).png"
             style={{
               width: "100%",
-              height: "50%",
+              height: "49.5vh",
             }}
             alt=""
           />
         </Stack>
+
         <Stack
           direction="column"
           alignItems="center"
@@ -110,19 +146,21 @@ const Login = () => {
           <Stack
             width={{ lg: "60%", md: "80%", sm: "97", xs: "97%" }}
             height={500}
-            boxShadow="0px 0px 22px 3px rgba(168,168,168,1)"
+            boxShadow="0px 0px 12px 3px rgba(168,168,168,1)"
             justifyContent="center"
+            borderRadius="20px"
           >
             <Typography
-              mb="10px"
+              mt={-3}
+              mb={4}
               color="#474747"
               fontSize="30px"
               fontFamily="Montserrat"
               fontWeight="600"
-              textAlign="start"
-              ml={3}
+              textAlign="center"
+              // ml={3}
             >
-              Log in
+              Giriş
             </Typography>
             <form
               onSubmit={handleSubmit}
@@ -146,24 +184,47 @@ const Login = () => {
                 sx={{
                   borderRadius: "50px",
                   fontFamily: "Montserrat",
-                  width: { lg: "70%", md: "70%", sm: "90%", xs: "90%" },
+                  width: { lg: "80%", md: "70%", sm: "90%", xs: "90%" },
+                }}
+              />
+              <TextField
+                name="password"
+                label="Açar söz"
+                fullWidth
+                variant="outlined"
+                type={showPassword ? "text" : "password"}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                InputLabelProps={{
+                  sx: {
+                    color: "#757575", // Set the label color
+                  },
+                }}
+                sx={{
+                  width: { lg: "80%", md: "70%", sm: "90%", xs: "90%" },
+                  transition: "all ease-in-out 0.2s",
+
+                  backgroundColor: "#fff",
+                  height: "60px",
+                  color: "#000",
+                  outline: "none",
+                  boxShadow: "none",
                 }}
               />
 
-              <TextField
-                id="outlined-basic"
-                label="Açar söz"
-                type="password"
-                name="password"
-                onChange={(e) => setPassword(e.target.value)}
-                variant="outlined"
-                autoComplete="off"
-                sx={{
-                  borderRadius: "50px",
-                  width: { lg: "70%", md: "70%", sm: "90%", xs: "90%" },
-                  fontFamily: "Montserrat",
-                }}
-              />
               <Stack
                 // direction="row"
                 direction={{ lg: "row", md: "row", sm: "row", xs: "column" }}

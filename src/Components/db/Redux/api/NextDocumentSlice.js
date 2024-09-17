@@ -17,13 +17,13 @@ export const updateDocument = createAsyncThunk(
   async ({ body, id }, { dispatch, rejectWithValue }) => {
     try {
       const resp = await AxiosInstance.patch("/docs/updata-version", body);
-      toast.success("Document successfully sent!");
+      toast.success("Resminama üstünlikli ugradyldy!");
       // Optionally dispatch an action to refresh documents list
       dispatch(getDocumentById(id));
       // Refresh documents list if needed
       return resp.data;
     } catch (error) {
-      toast.error("Failed to create document");
+      toast.error("Ýalňyşlyk!");
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -44,6 +44,7 @@ export const updateDocumentWithoutFile = createAsyncThunk(
     }
   }
 );
+
 // Create the slice
 
 const userNextDocument = createSlice({
@@ -81,6 +82,7 @@ const userNextDocument = createSlice({
         state.status = "succeeded";
         state.data = action.payload;
       });
+
     //create
   },
 });

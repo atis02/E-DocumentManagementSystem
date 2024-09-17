@@ -19,11 +19,9 @@ export const getDocumentById = createAsyncThunk(
       const response = await AxiosInstance.get(
         `docs/get-item-doc?userId=${userID.id}&documentId=${id}`
       );
-      console.log(response.data);
 
       return response.data.document;
     } catch (error) {
-      console.log(error.response.data);
       toast.error("Failed to fetch document");
 
       return rejectWithValue(error.response.data);

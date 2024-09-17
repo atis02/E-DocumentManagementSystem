@@ -3,11 +3,13 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Montserrat';
+
 }
-@font-face {
+/* @font-face {
   font-family: Montserrat;
   src: url(/Montserrat-VariableFont_wght.ttf);
-}
+  font-display: swap;
+} */
 .sidebar ::-webkit-scrollbar {
   width: 0.1px;
   background-color: #0B57D0;
@@ -65,8 +67,8 @@ background: #c6c6c6;
 
 .file-input-label {
   display: inline-block;
-  width: 240px;
-  height:120px;
+  width: 320px;
+  height:160px;
   border-radius: 30px;
   cursor: pointer;
   font-size: 16px;
@@ -102,7 +104,6 @@ background: #c6c6c6;
   background-color: transparent;
 
 }
-
 
 .pl { 
   width: 8em; 

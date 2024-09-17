@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MenuItem,
-  Box,
   Button,
   Divider,
   FormControl,
@@ -21,11 +20,10 @@ import {
   Modal,
   Autocomplete,
   CircularProgress,
+  Checkbox,
+  Box,
+  FormControlLabel,
 } from "@mui/material";
-import { Dropzone, FileMosaic } from "@files-ui/react";
-import toast, { Toaster } from "react-hot-toast";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Link, NavLink } from "react-router-dom";
 import dayjs from "dayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
@@ -33,38 +31,84 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Edit";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import AxiosInstance from "../../Components/db/Redux/api/AxiosHelper";
 import { useDispatch, useSelector } from "react-redux";
 import { createDocument } from "../../Components/db/Redux/api/PostDocumentSlice";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
+
+import moment from "moment";
 import {
   createDocTypes,
   getDocTypes,
 } from "../../Components/db/Redux/api/DocTypeSlice";
+import { toast } from "react-toastify";
 
 function NewDocument() {
-  const [files, setFiles] = useState();
+  const [files, setFiles] = useState(null);
   const [users, setUsers] = useState([]);
-  const [docTypes, setDocTypes] = useState([]);
   const [plusDoctype, setPlusDoctype] = useState("");
   const dispatch = useDispatch();
+  const [sendDate, setSendDate] = useState(dayjs());
+  const [limitDate, setLimitDate] = useState(dayjs());
+  const [openModal, setOpenModal] = useState(false);
+  const [seconds, setSeconds] = useState(15);
+  const [permission, setPermission] = useState([]);
+  const [depTitle, setDeptitle] = useState("");
+  const [posTitle, setPostitle] = useState("");
+  const [department, setDepartment] = useState([]);
+  const [position, setPosition] = useState([]);
 
-  const sendDateRef = useRef("");
-  const limitDate = useRef("");
-
+  const handleOpen = () => {
+    setOpenModal(true), setSeconds(15);
+  };
+  const handleClose = () => {
+    clear();
+    setOpenModal(false);
+  };
   const [titleDoc, setTitleDoc] = useState({
     title: "",
     typeDoc: "",
     description: "",
   });
+  useEffect(() => {
+    if (openModal && seconds > 0) {
+      const timer = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [openModal, seconds]);
 
   const handleFormChange = (e) => {
     setTitleDoc({
       ...titleDoc,
       [e.target.name]: e.target.value,
     });
+  };
+  const handleChange = (event) => {
+    setDeptitle(event.target.value);
+    setPostitle("");
+  };
+  const handleChangePosition = (event) => {
+    setPostitle(event.target.value);
+    setDeptitle("");
+  };
+
+  // Handle checkbox state changes
+  const handleChangeCheckBoxes = (event, index, checkbox) => {
+    const i = permission.findIndex((obj) => obj.key === checkbox.key);
+    if (i !== -1) {
+      const updatedPermissions = [
+        ...permission.slice(0, i),
+        { ...permission[i], value: !checkbox.value },
+        ...permission.slice(i + 1),
+      ];
+      setPermission(updatedPermissions);
+    }
   };
 
   const updateFiles = (e) => {
@@ -92,49 +136,90 @@ function NewDocument() {
       dispatch(getDocTypes());
     }
   }, [status, dispatch]);
+  useEffect(() => {
+    const department = async () => {
+      await AxiosInstance.get("/department/get").then((res) => {
+        setDepartment(res.data);
+      });
+    };
+    const position = async () => {
+      await AxiosInstance.get("/position/get").then((res) => {
+        setPosition(res.data);
+      });
+    };
+
+    const permissionData = async () => {
+      await AxiosInstance.get("/docs/permissions").then((res) => {
+        setPermission(res.data);
+      });
+    };
+    permissionData();
+    department();
+    position();
+  }, []);
 
   const admin = JSON.parse(localStorage.getItem("user"));
 
-  const handleDelete = (id) => {
-    const updatedFiles = files.filter((x) => x.id != id);
-    setFiles(updatedFiles);
+  const handleDelete = (elem) => {
+    setFiles((prevFile) => prevFile.filter((file) => file !== elem));
   };
   // steps func is start
   const [open, setOpen] = useState(false);
+  const [openRassylka, setOpenRassylka] = useState(false);
+  const [rassylkaPeople, setRassylkaPeople] = useState([]);
   const [openDoctype, setOpenDoctype] = useState(false);
   const [values, setValues] = useState("");
   const [valuesDesc, setValuesDesc] = useState("");
   const [stepUser, setStepUser] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
   const [time, setTime] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [userId, setUserId] = useState();
   const [addStep, setAddStep] = useState(null);
   const [deleteId, setDeleteId] = useState();
-  //sub step func started
+  const [permissionTitle, setPermissionTitle] = useState("");
+
+  // const handleFileChange = (files) => {
+  //   setFiles(Array.from(files));
+  // };
+  const handleFileChange = (event) => {
+    setFiles(event.target.files[0]);
+  };
+
   const filteredLoggedUsers = users.filter((item) => item.id !== admin.id);
 
-  const handleClose = () => setModalOpen(false);
-
-  const handleNext = (index) => {
-    setModalOpen(true);
-    setTime(index === time ? null : index);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    toast.success("Document was send BACK!");
-  };
+  const filteredUsers = filteredLoggedUsers.filter((item) => {
+    if (item.departmentId == depTitle) {
+      return item.departmentId;
+    }
+    if (item.positionId == posTitle) {
+      return item.positionId;
+    }
+  });
 
   const handleChangeStep = (e, newValues) => {
-    setValues(newValues.login);
+    setValues(
+      newValues.firstname +
+        " " +
+        newValues.surname +
+        " " +
+        `(${newValues.position.name})`
+    );
     setUserId(newValues.id);
     setUsers((prevUsers) => prevUsers.filter((u) => u.id !== newValues.id));
   };
+  const handleChangeStepRassylka = (e, newValues) => {
+    setRassylkaPeople(newValues);
+  };
+  const handleAddStepRassylka = () => {
+    setOpenRassylka(false);
+  };
+
   const handleChangeDesc = (e) => {
     setValuesDesc(e.target.value);
   };
-
+  const handleChangePermission = (event) => {
+    setPermissionTitle(event.target.value);
+  };
   const handleAddStep = (e) => {
     const lastElement = stepUser.length > 0 && stepUser[stepUser.length - 1];
     e.preventDefault();
@@ -145,6 +230,7 @@ function NewDocument() {
           id: userId,
           values: values,
           status: false,
+          permissions: permission,
         })
       : "";
     setValues("");
@@ -160,23 +246,24 @@ function NewDocument() {
     transform: "translate(-50%, -50%)",
     width: 400,
     bgcolor: "background.paper",
-    border: "1px solid #000",
+    border: "1px solid transparent",
+    borderRadius: "20px",
     boxShadow: 4,
-    p: 1,
+    p: 3,
   };
   const clear = () => {
-    (sendDateRef.current.value = ""),
-      (limitDate.current.value = ""),
+    setSendDate(dayjs()),
+      setLimitDate(dayjs()),
       setTitleDoc({
         title: "",
         typeDoc: "",
         description: "",
       });
-    setStepUser([]), setFiles();
+    setStepUser([]), setFiles(null);
+    setRassylkaPeople([]);
   };
   const handleDelete2 = (id) => {
     const updatedStep = stepUser.filter((item) => item.id !== id);
-
     setStepUser(updatedStep);
   };
 
@@ -185,21 +272,23 @@ function NewDocument() {
       toast.error("Resminamanyň adyny doly giriziň!");
     } else if (titleDoc.typeDoc.trim().length <= 0) {
       toast.error("Resminamanyň görnüşini saýlaň!");
-    } else if (
-      limitDate.current.value == "YYYY-MM-DD" ||
-      sendDateRef.current.value == "YYYY-MM-DD"
-    ) {
+    } else if (limitDate == "YYYY-MM-DD" || sendDate == "YYYY-MM-DD") {
       toast.error("Sene ýalňyş");
-    } else if (stepUser.length <= 0) {
+    } else if (rassylkaPeople.length === 0 && stepUser.length === 0) {
       toast.error("Ugratmaly adamlary saýlaň");
-    } else if (sendDateRef.current.value > limitDate.current.value) {
+    } else if (sendDate > limitDate) {
       toast.error("Ugratmaly sene Seretmeli möhletden uly bolup bilmeýär!");
-    } else if (files === undefined) {
+    } else if (files === null) {
       toast.error("Resminamany saylan!");
     } else {
       const body = new FormData();
 
-      stepUser[0].status = true;
+      //stepUser[0].status = true;
+
+      if (!rassylkaPeople.length) {
+        stepUser[0].status = true;
+      }
+
       body.append(
         "doc",
         JSON.stringify({
@@ -208,42 +297,25 @@ function NewDocument() {
             type: titleDoc.typeDoc,
             description: titleDoc.description,
             statusType: "ACTIVE",
-            startTime: sendDateRef.current.value,
-            endTime: limitDate.current.value,
+            startTime: sendDate,
+            endTime: limitDate,
           },
           user: {
             id: admin.id,
           },
-          recivers: stepUser,
+          recivers: stepUser.length == 0 ? rassylkaPeople : stepUser,
         })
       );
       body.append("file", files);
       dispatch(createDocument(body));
-      clear();
+      handleOpen();
+
+      setTimeout(() => {
+        handleClose();
+      }, 15000);
     }
   };
-  console.log(data);
 
-  const [file, setFile] = useState(null);
-  const [fileInfo, setFileInfo] = useState([]);
-
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFileInfo(
-        `File name: ${selectedFile.name}, File size: ${
-          selectedFile.size > 1000000000
-            ? selectedFile.size / 1000000000 + "GB"
-            : selectedFile.size > 1000000
-            ? selectedFile.size / 1000000 + "MB"
-            : selectedFile.size > 1000
-            ? selectedFile.size / 1000 + "KB"
-            : selectedFile.size + "Bytes"
-        } `
-      );
-    }
-  };
   const handleSubmitDocType = () => {
     const body = {
       documentType: plusDoctype,
@@ -252,6 +324,7 @@ function NewDocument() {
     setPlusDoctype("");
     setOpenDoctype(false);
   };
+
   return (
     <Box
       height="100vh"
@@ -259,10 +332,10 @@ function NewDocument() {
       backgroundColor="#f2f9fc"
       overflow="scroll"
     >
-      <Toaster />
       <Typography p="10px" fontSize="30px" fontWeight="600">
         Täze Resminama
       </Typography>
+
       <Stack
         p="20px"
         backgroundColor="#fff"
@@ -368,26 +441,30 @@ function NewDocument() {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DemoContainer
                   components={["DatePicker", "DatePicker"]}
-                  sx={{ display: "flex", alignItems: "center" }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
                 >
                   <DatePicker
-                    inputRef={sendDateRef}
                     format="YYYY-MM-DD"
-                    value={sendDateRef.current.value}
-                    // defaultValue={new Date()}
+                    value={sendDate}
+                    onChange={(newValue) => {
+                      setSendDate(newValue);
+                    }}
                     sx={{
                       width: "100%",
-                      ...(sendDateRef.current.value > limitDate.current.value
+                      ...(sendDate > limitDate
                         ? {
                             border: "1px solid red",
-                            borderRadius: "5px",
+                            borderRadius: "20px",
                           }
                         : ""),
                     }}
                     slotProps={{
                       textField: {
                         helperText:
-                          sendDateRef.current.value > limitDate.current.value
+                          sendDate > limitDate
                             ? "Seretmeli möhletden öňde bolup bilmeýär!"
                             : "",
                       },
@@ -397,33 +474,28 @@ function NewDocument() {
                     Seretmeli möhleti
                   </Typography>
                   <DatePicker
-                    // defaultValue={new Date()}
-                    inputRef={limitDate}
+                    value={limitDate}
+                    onChange={(newValue) => {
+                      setLimitDate(newValue);
+                    }}
                     format="YYYY-MM-DD"
                     sx={{
+                      borderRadius: "20px",
+
                       width: "100%",
-                      ...(limitDate.current.value < sendDateRef.current.value
+                      ...(limitDate < sendDate
                         ? {
                             border: "1px solid red",
                             borderRadius: "5px",
                           }
                         : ""),
                     }}
-                    value={limitDate.current.value}
                   />
                 </DemoContainer>
               </LocalizationProvider>
             </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Typography width="30%" textAlign="end">
-              Kimden:
-            </Typography>
-            <Typography width="100%" textAlign="start">
-              {admin.login}
-            </Typography>
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={2}></Stack>
+
           <Stack direction="row" alignItems="center" spacing={2}>
             <Typography width="30%" textAlign="end">
               Bellik
@@ -438,6 +510,9 @@ function NewDocument() {
               multiline
               label="(Hokman däl)"
               variant="outlined"
+              sx={{
+                borderRadius: "50px",
+              }}
             />
           </Stack>
           <Stack>
@@ -451,30 +526,83 @@ function NewDocument() {
                 mt: "30px",
               }}
             >
-              <Toaster />
               <Typography fontSize={20} mb={2}>
-                Ugradyjy : {admin.login}
+                Ugradyjy : {admin.firstname + " " + admin.surname}
               </Typography>
-
-              <Stepper
-                activeStep={activeStep}
-                orientation="vertical"
-                // sx={{ gap: "20px" }}
-              >
+              <Stack direction="row" width="100%" spacing={2}>
+                <FormControl sx={{ width: "100%" }}>
+                  <InputLabel id="select-label">Bölümi boýunça</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    value={depTitle}
+                    onChange={handleChange}
+                    label="Select Option"
+                    sx={{
+                      borderRadius: "20px",
+                    }}
+                  >
+                    {department.map((elem) => (
+                      <MenuItem key={elem.id} value={elem.id}>
+                        {elem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "100%" }}>
+                  <InputLabel id="select-label">Wezipesi boýunça</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    value={posTitle}
+                    onChange={handleChangePosition}
+                    label="Select Option"
+                    sx={{
+                      borderRadius: "20px",
+                    }}
+                  >
+                    {position.map((elem) => (
+                      <MenuItem key={elem.id} value={elem.id}>
+                        {elem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+              <Stepper activeStep={null} orientation="vertical">
                 {stepUser.length !== 0 &&
                   stepUser.map((step, index) => (
                     <Step
-                      // sx={{
-                      //   ...(activeStep === index
-                      //     ? { background: "lightgray" }
-                      //     : ""),
-                      // }}
                       key={step.id + index}
+                      sx={{
+                        mt: "10px",
+                        borderRadius: "20px",
+                        border: "1px solid gray",
+                        p: 2,
+                        pb: 4,
+                      }}
                     >
                       <StepLabel className="step">
-                        <Typography fontSize="20px" fontWeight={600}>
-                          {step.values}
-                        </Typography>
+                        <Stack
+                          direction="row"
+                          alignItems={"center"}
+                          spacing={2}
+                        >
+                          <Typography
+                            fontSize="20px"
+                            // color="#000"
+                            fontWeight={600}
+                          >
+                            {step.values}
+                          </Typography>
+                          {step.permissions.map((item) =>
+                            item.key == "READ" ? (
+                              <AutoStoriesIcon />
+                            ) : item.key == "EDIT" && item.value === true ? (
+                              <EditIcon />
+                            ) : (
+                              ""
+                            )
+                          )}
+                        </Stack>
                       </StepLabel>
                       <Stack
                         direction="row"
@@ -523,95 +651,16 @@ function NewDocument() {
                           // disabled={admin.id === step.id}
                           sx={{
                             gap: "5px",
+                            height: "50px",
                           }}
                           onClick={() => {
                             handleDelete2(step.id);
                             setDeleteId(step);
                           }}
                         >
-                          {step.values}
-
                           <DeleteIcon />
                         </Button>
                       </Stack>
-
-                      <StepContent>
-                        {/* <Modal
-                          open={modalOpen}
-                          onClose={handleClose}
-                          aria-labelledby="modal-modal-title"
-                          aria-describedby="modal-modal-description"
-                          BackdropProps={{
-                            style: {
-                              backgroundColor: "#7F7F7F",
-                              opacity: "0.6",
-                            },
-                          }}
-                        >
-                          <Box sx={style} height="130px">
-                            <Typography textAlign="center" fontSize={22}>
-                              Resminamany ugratmak isleýärsiňizmi?
-                            </Typography>
-                            <Stack
-                              alignItems="center"
-                              direction="row"
-                              justifyContent="center"
-                              height="100%"
-                              spacing={6}
-                            >
-                              <Button
-                                sx={{
-                                  background: "green",
-                                  color: "#fff",
-                                  "&:hover": { background: "#000" },
-                                }}
-                                onClick={() =>
-                                  setActiveStep(
-                                    (prevActiveStep) => prevActiveStep + 1,
-                                    handleClose(),
-                                    toast.success("Document successfully sent!")
-                                  )
-                                }
-                              >
-                                Tassykla
-                              </Button>
-                              <Button
-                                sx={{
-                                  background: "red",
-                                  color: "#fff",
-                                  "&:hover": { background: "#000" },
-                                }}
-                                onClick={handleClose}
-                              >
-                                Ret et
-                              </Button>
-                            </Stack>
-                          </Box>
-                        </Modal>
-                        <Box sx={{ mb: 2 }}>
-                          <Button
-                            variant="outlined"
-                            color="success"
-                            onClick={() => handleNext(index)}
-                            disabled={
-                              stepUser.length === 1 ||
-                              index === stepUser.length - 1
-                            }
-                            sx={{ mt: 1, mr: 1 }}
-                          >
-                            Ugratmak
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            disabled={index === 0}
-                            onClick={handleBack}
-                            sx={{ mt: 1, mr: 1 }}
-                          >
-                            Yzyna
-                          </Button>
-                        </Box> */}
-                      </StepContent>
                     </Step>
                   ))}
                 {open ? (
@@ -626,12 +675,22 @@ function NewDocument() {
                     onSubmit={handleAddStep}
                   >
                     <Autocomplete
-                      // multiple={true}
                       disableClearable
                       id="combo-box-demo"
-                      options={filteredLoggedUsers}
+                      options={
+                        filteredUsers.length === 0
+                          ? filteredLoggedUsers
+                          : filteredUsers
+                      }
+                      focused
                       filterSelectedOptions
-                      getOptionLabel={(option) => option.login}
+                      getOptionLabel={(option) =>
+                        option.firstname +
+                        " " +
+                        option.surname +
+                        " " +
+                        `(${option.position.name})`
+                      }
                       onChange={handleChangeStep}
                       renderInput={(params) => (
                         <TextField
@@ -646,6 +705,7 @@ function NewDocument() {
                         />
                       )}
                     />
+
                     <TextField
                       fullWidth
                       name="description"
@@ -656,30 +716,227 @@ function NewDocument() {
                       label="Bellik"
                       variant="outlined"
                     />
-                    <Button
-                      type="submit"
-                      sx={{
-                        backgroundColor: "blue",
-                        color: "#fff",
-                        "&:hover": { background: "black" },
-                      }}
+                    <Stack direction="row" justifyContent="center">
+                      {permission.map((checkbox, index) => (
+                        <FormControlLabel
+                          key={index}
+                          control={
+                            <Checkbox
+                              checked={checkbox.value === true}
+                              value={checkbox.key}
+                              defaultChecked={checkbox.value == true}
+                              onChange={(event) =>
+                                handleChangeCheckBoxes(event, index, checkbox)
+                              }
+                              inputProps={{
+                                "aria-label": checkbox.key,
+                              }}
+                            />
+                          }
+                          label={checkbox.key}
+                        />
+                      ))}
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="flex-end"
+                      width="100%"
+                      spacing={2}
                     >
-                      goşmak
-                    </Button>
+                      <Button
+                        type="submit"
+                        sx={{
+                          backgroundColor: "blue",
+                          color: "#fff",
+                          "&:hover": { background: "black" },
+                          width: "25%",
+                        }}
+                      >
+                        goşmak
+                      </Button>
+                      <Button
+                        onClick={() => setOpen(false)}
+                        sx={{
+                          backgroundColor: "red",
+                          width: "5%",
+                          color: "#fff",
+                          "&:hover": { background: "black" },
+                        }}
+                      >
+                        X
+                      </Button>
+                    </Stack>
                   </form>
                 ) : (
                   ""
                 )}
-                <Button
-                  sx={{ mt: "20px", gap: "10px" }}
-                  onClick={() => setOpen(!open)}
-                  last="true"
-                  variant="outlined"
+                {openRassylka ? (
+                  <form
+                    last="true"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      marginTop: "30px",
+                    }}
+                    onSubmit={handleAddStepRassylka}
+                  >
+                    <Typography>
+                      Rassylka üçin ugratmaly adamlary saýla
+                    </Typography>
+                    <Autocomplete
+                      disableClearable
+                      id="combo-box-demo"
+                      options={
+                        filteredUsers.length === 0
+                          ? filteredLoggedUsers
+                          : filteredUsers
+                      }
+                      focused
+                      multiple={true}
+                      filterSelectedOptions
+                      getOptionLabel={(option) =>
+                        option.firstname +
+                        " " +
+                        option.surname +
+                        " " +
+                        `(${option.position.name})`
+                      }
+                      onChange={handleChangeStepRassylka}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          name="user_name"
+                          focused
+                          id="outlined-basic"
+                          autoComplete="off"
+                          label="Wezipe , Bölüm , Işgär "
+                          variant="outlined"
+                        />
+                      )}
+                    />
+
+                    <TextField
+                      fullWidth
+                      name="description"
+                      value={valuesDesc}
+                      onChange={handleChangeDesc}
+                      autoComplete="off"
+                      id="outlined-basic"
+                      label="Bellik"
+                      variant="outlined"
+                    />
+                    {/* <Stack direction="row" justifyContent="center">
+                      {permission.map((checkbox, index) => (
+                        <FormControlLabel
+                          key={index}
+                          control={
+                            <Checkbox
+                              checked={checkbox.value === true}
+                              value={checkbox.key}
+                              defaultChecked={checkbox.value == true}
+                              onChange={(event) =>
+                                handleChangeCheckBoxes(event, index, checkbox)
+                              }
+                              inputProps={{
+                                "aria-label": checkbox.key,
+                              }}
+                            />
+                          }
+                          label={checkbox.key}
+                        />
+                      ))}
+                    </Stack> */}
+                    <Stack
+                      direction="row"
+                      justifyContent="flex-end"
+                      width="100%"
+                      spacing={2}
+                    >
+                      <Button
+                        type="submit"
+                        sx={{
+                          backgroundColor: "blue",
+                          color: "#fff",
+                          "&:hover": { background: "black" },
+                          width: "25%",
+                        }}
+                      >
+                        goşmak
+                      </Button>
+                      <Button
+                        onClick={() => setOpenRassylka(false)}
+                        sx={{
+                          backgroundColor: "red",
+                          width: "5%",
+                          color: "#fff",
+                          "&:hover": { background: "black" },
+                        }}
+                      >
+                        X
+                      </Button>
+                    </Stack>
+                  </form>
+                ) : (
+                  ""
+                )}
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  justifyContent="space-between"
+                  mt={3}
                 >
-                  <GroupAddIcon />
-                  Kime Ugratmaly
-                </Button>
+                  {open || openRassylka || rassylkaPeople.length ? (
+                    ""
+                  ) : (
+                    <Button
+                      sx={{ gap: "10px", width: "100%" }}
+                      onClick={() => {
+                        setOpen(!open);
+                        setOpenRassylka(false);
+                      }}
+                      last="true"
+                      variant="outlined"
+                    >
+                      <GroupAddIcon />
+                      Kime Ugratmaly
+                    </Button>
+                  )}
+                  {open || openRassylka || stepUser.length ? (
+                    ""
+                  ) : (
+                    <Button
+                      sx={{ gap: "10px", width: "100%" }}
+                      onClick={() => {
+                        setOpenRassylka(!openRassylka);
+                        setOpen(false);
+                      }}
+                      last="true"
+                      variant="outlined"
+                    >
+                      <GroupAddIcon />
+                      Rassylka
+                    </Button>
+                  )}
+                </Stack>
               </Stepper>
+              {rassylkaPeople.length ? (
+                <Stack mt={2}>
+                  <Typography fontSize={25} mb={1}>
+                    Kabul edijiler:
+                  </Typography>
+                  {rassylkaPeople.length
+                    ? rassylkaPeople.map((item, index) => (
+                        <Typography fontSize={20}>
+                          {index + 1}. {item.firstname} {item.surname}
+                        </Typography>
+                      ))
+                    : ""}
+                </Stack>
+              ) : (
+                ""
+              )}
             </Box>
           </Stack>
           <Stack alignItems="start">
@@ -696,6 +953,54 @@ function NewDocument() {
             >
               Registrasiýa
             </Button>
+            <Modal
+              open={openModal}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <>
+                <Box sx={style}>
+                  <Stack alignItems="end" width="100%" mt={-2}>
+                    <IconButton
+                      sx={{ fontWeight: 600, fontSize: 20 }}
+                      onClick={handleClose}
+                    >
+                      X
+                    </IconButton>
+                  </Stack>
+                  <Stack
+                    direction="column"
+                    alignItems="start"
+                    justifyContent="center"
+                    width={"100%"}
+                  >
+                    <Typography mt={-4} textAlign="center" fontSize={25}>
+                      {seconds}
+                    </Typography>
+                    <Typography width={"100%"} textAlign="center" fontSize={25}>
+                      Resminama döredildi.
+                    </Typography>
+                    <Stack
+                      direction="column"
+                      width={"100%"}
+                      p="10px"
+                      spacing={2}
+                      alignItems="start"
+                      justifyContent="space-between"
+                    >
+                      <Typography>Ady: {titleDoc.title}</Typography>
+                      <Typography>Görnüşi: {titleDoc.typeDoc}</Typography>
+                      <Typography>Bellik: {titleDoc.description}</Typography>
+                      <Typography>
+                        Döredilen senesi :{" "}
+                        {moment(new Date()).format("YYYY-MM-DD HH:mm")}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Box>
+              </>
+            </Modal>
           </Stack>
         </Stack>
 
@@ -706,42 +1011,58 @@ function NewDocument() {
             pt: "50px",
           }}
         >
-          <Stack direction="row" spacing={3}>
-            <input type="file" onChange={(e) => setFiles(e.target.files[0])} />{" "}
-            {/* <Dropzone
-              onChange={updateFiles}
-              style={{
-                ...(files.length > 0 ? { height: "240px", width: "100%" } : ""),
-              }}
-              value={files}
-            >
-              files
-              {files.length > 0 ? `${files.length} sany faýl geçirildi ` : ""}
-            </Dropzone> */}
-            {/* <Stack>
-              <div class="file-input-wrapper">
-                <input
-                  type="file"
-                  onChange={updateFiles}
-                  id="file"
-                  className="file-input"
-                  style={{
-                    ...(files.length > 0
-                      ? { height: "240px", width: "100%" }
-                      : ""),
-                  }}
-                />
-                <label for="file" className="file-input-label"></label>
-              </div>
-              <div>{fileInfo.length == 0 ? "File Not selected" : fileInfo}</div>
-            </Stack> */}
-            <div
-            // style={{
-            //   ...(files.length > 0
-            //     ? { display: "flex" }
-            //     : { flexDirection: "column" }),
-            // }}
-            >
+          <Stack direction="row" justifyContent="space-between">
+            <Stack direction="column" width="90%" spacing={1}>
+              <Stack direction="row" justifyContent="center">
+                <Stack position="relative" display="inline-block">
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    id="file"
+                    multiple
+                    className="file-input"
+                  />
+                  <label htmlFor="file" className="file-input-label"></label>
+                </Stack>
+              </Stack>
+              {files !== null ? (
+                <>
+                  <Typography>Ady :{files.name}</Typography>
+                  <Typography>Göwrümi : {files.size}B</Typography>
+                </>
+              ) : (
+                "Faýl saýlaň"
+              )}
+              {/* {files.length == 0
+                ? "Faýl saýlanmady"
+                : files.map((elem) => (
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography>
+                        Faýl ady: {elem.name}, Faýl göwrümi:{" "}
+                        {elem.size > 1000000000
+                          ? elem.size / 1000000000 + "GB"
+                          : elem.size > 1000000
+                          ? elem.size / 1000000 + "MB"
+                          : elem.size > 1000
+                          ? elem.size / 1000 + "KB"
+                          : elem.size + "Bytes"}
+                      </Typography>
+
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        sx={{
+                          gap: "5px",
+                          height: "50px",
+                        }}
+                        onClick={() => handleDelete(elem)}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Stack>
+                  ))} */}
+            </Stack>
+            <div>
               <Link
                 to="/docs/NewDocument.docx"
                 target="_blank"
@@ -774,67 +1095,6 @@ function NewDocument() {
               </Link>
             </div>
           </Stack>
-          <Typography fontSize={25} textAlign="center" mt="40px" mb="10px">
-            {/* {files.length > 0 ? "Faýly görmek  üçin basyň!" : ""} */}
-          </Typography>
-          {/* <Stack spacing={5}>
-            {files.map((file, index) => (
-              <Stack
-                key={file.id}
-                sx={{
-                  ...(open === file.id ? { background: "lightgray" } : ""),
-                }}
-                direction="column"
-                justifyContent="center"
-              >
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-evenly"
-                  spacing={4}
-                  mb="20px"
-                >
-                  <Typography fontSize={25} textAlign="center">
-                    {++index}
-                  </Typography>
-                  <FileMosaic
-                    {...file}
-                    onClick={() => handleOpen(file.id)}
-                    preview
-                  />
-                  <CheckCircleIcon sx={{ color: "green" }} />
-                  <IconButton onClick={() => handleDelete(file.id)}>
-                    <DeleteIcon
-                      sx={{ color: "red", width: "40px", height: "40px" }}
-                    />
-                  </IconButton>
-                </Stack>
-                <Divider />
-                {open2 === file.id && (
-                  <Stack
-                    width="95%"
-                    mt="20px"
-                    direction="row"
-                    alignItems="center"
-                    p="15px"
-                  >
-                    {file.type == "image/jpeg" ? (
-                      console.log("have")
-                    ) : (
-                      <iframe
-                        src="/docs/Ikramow Atamyrat ylmy iş Täze.docx"
-                        style={{
-                          border: "none",
-                          width: "100%",
-                          height: "85vh",
-                        }}
-                      ></iframe>
-                    )}
-                  </Stack>
-                )}
-              </Stack>
-            ))}
-          </Stack> */}
         </Stack>
       </Stack>
     </Box>

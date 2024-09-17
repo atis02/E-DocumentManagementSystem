@@ -2,7 +2,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -24,17 +28,53 @@ import AxiosInstance from "../Components/db/Redux/api/AxiosHelper";
 const Register = () => {
   const [data, setData] = useState();
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+993");
   const [login, setLogin] = useState("");
   const [surname, setSurname] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [errMsg, setErrMsg] = useState("");
+  const [department, setDepartment] = useState([]);
+  const [position, setPosition] = useState([]);
+  const [role, setRole] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [depTitle, setDeptitle] = useState("");
+  const [posTitle, setPostitle] = useState("");
+  const [roleTitle, setRoletitle] = useState("");
 
+  const handleChange = (event) => {
+    setDeptitle(event.target.value);
+  };
+  const handleChangePosition = (event) => {
+    setPostitle(event.target.value);
+  };
+  const handleChangeRole = (event) => {
+    setRoletitle(event.target.value);
+  };
   useEffect(() => {
     setErrMsg("");
   }, [email, password]);
+  useEffect(() => {
+    const department = async () => {
+      await AxiosInstance.get("/department/get").then((res) => {
+        setDepartment(res.data);
+      });
+    };
+    const position = async () => {
+      await AxiosInstance.get("/position/get").then((res) => {
+        setPosition(res.data);
+      });
+    };
+    const role = async () => {
+      await AxiosInstance.get("/role/get").then((res) => {
+        setRole(res.data);
+      });
+    };
+    department();
+    position();
+    role();
+  }, []);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
@@ -51,9 +91,12 @@ const Register = () => {
           firstname: name,
           email: email,
           phoneNumber: phoneNumber,
+          departmentId: depTitle,
+          positionId: posTitle,
+          roleId: roleTitle,
         });
         setTimeout(() => navigate("/login"), 2000),
-          toast.success("Registration Succesfully !");
+          toast.success("Üstünlikli!");
         setEmail("");
         setPhoneNumber("");
         setLogin("");
@@ -66,7 +109,8 @@ const Register = () => {
       toast.error(
         error.message === "Network Error"
           ? "Internet baglanyşygy ýok"
-          : error.response.data.message,
+          : error.response.data.error,
+
         dispatch(registerFailure(error.message || "Login failed"))
       );
       setLoading(false);
@@ -82,31 +126,59 @@ const Register = () => {
           backgroundColor="#3763f5"
           sx={{ display: { lg: "block", md: "block", sm: "none", xs: "none" } }}
         >
+          <Stack
+            left="30px"
+            top="30px"
+            position="absolute"
+            width={250}
+            direction="row"
+            alignItems="center"
+          >
+            <img
+              src="/images/Logo.png"
+              style={{
+                width: "85px",
+                height: "95px",
+              }}
+              alt=""
+            />
+            <Typography
+              textAlign="center"
+              color="#fff"
+              fontWeight="500"
+              fontSize={20}
+              ml={-3}
+              fontFamily="Montserrat"
+            >
+              ÄLEM TILSIMAT
+            </Typography>
+          </Stack>
           <img
             src="/images/login (2).png"
             style={{
               width: "100%",
-              height: "50%",
+              height: "49.4vh",
             }}
             alt=""
           />
           <Typography
             textAlign="center"
             color="#fff"
-            fontWeight="400"
+            fontWeight="500"
             fontSize={55}
             position="absolute"
-            top="50%"
-            right="71%"
+            top="45%"
+            left="3%"
             fontFamily="Montserrat"
           >
             ÄLEM DOCS
           </Typography>
+
           <img
             src="/images/login (1).png"
             style={{
               width: "100%",
-              height: "50%",
+              height: "49.5vh",
             }}
             alt=""
           />
@@ -120,8 +192,9 @@ const Register = () => {
         >
           <Stack
             width={{ lg: "60%", md: "80%", sm: "97", xs: "97%" }}
-            height={500}
-            boxShadow="0px 0px 22px 3px rgba(168,168,168,1)"
+            height={550}
+            boxShadow="0px 0px 12px 3px rgba(168,168,168,1)"
+            borderRadius="20px"
             justifyContent="center"
           >
             <Typography
@@ -207,6 +280,53 @@ const Register = () => {
                 />
               </Stack>
               <Stack direction="row" width="90%" spacing={2}>
+                <FormControl sx={{ width: "100%" }}>
+                  <InputLabel id="select-label">Bölümi saýlaň:</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    value={depTitle}
+                    onChange={handleChange}
+                    label="Select Option"
+                  >
+                    {department.map((elem) => (
+                      <MenuItem key={elem.id} value={elem.id}>
+                        {elem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "100%" }}>
+                  <InputLabel id="select-label">Wezipe saýlaň:</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    value={posTitle}
+                    onChange={handleChangePosition}
+                    label="Select Option"
+                  >
+                    {position.map((elem) => (
+                      <MenuItem key={elem.id} value={elem.id}>
+                        {elem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "100%" }}>
+                  <InputLabel id="select-label">Roly saýlaň:</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    value={roleTitle}
+                    onChange={handleChangeRole}
+                    label="Select Option"
+                  >
+                    {role.map((elem) => (
+                      <MenuItem key={elem.id} value={elem.id}>
+                        {elem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+              <Stack direction="row" width="90%" spacing={2}>
                 <TextField
                   id="outlined-basic"
                   label="Poçtaňyz"
@@ -226,6 +346,7 @@ const Register = () => {
                   label="Telefon belgiňiz"
                   type="text"
                   name="password"
+                  value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   variant="outlined"
                   autoComplete="off"

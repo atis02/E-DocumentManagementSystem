@@ -22,7 +22,6 @@ export const createDocTypes = createAsyncThunk(
     resp.data.message == "Successfully"
       ? toast.success("Üstünlikli döredildi!")
       : toast.error("Şowsuz!");
-    console.log(resp.data);
     const response = await AxiosInstance.get(`/docs/doctypes`);
     return response.data;
   }

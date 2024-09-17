@@ -1,4 +1,4 @@
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import React from "react";
 import { useState } from "react";
 
@@ -11,7 +11,8 @@ const FileInput = () => {
     if (selectedFile) {
       setFile(selectedFile);
       setFileInfo(
-        `File name: ${selectedFile.name}, File size: ${
+        `Faýl ady: ${selectedFile.name}, 
+        Faýl göwrümi: ${
           selectedFile.size > 1000000000
             ? selectedFile.size / 1000000000 + "GB"
             : selectedFile.size > 1000000
@@ -35,7 +36,13 @@ const FileInput = () => {
           />
           <label for="file" className="file-input-label"></label>
         </Stack>
-        <Stack>{fileInfo.length == 0 ? "File Not selected" : fileInfo}</Stack>
+        <Stack>
+          {fileInfo.length == 0 ? (
+            "Faýl saýlanmady"
+          ) : (
+            <Typography>{fileInfo}</Typography>
+          )}
+        </Stack>
       </Box>
     </>
   );
